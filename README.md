@@ -1,2 +1,4 @@
 # Bachelor-Thesis
 Thesis for Bachelor in Computer Science
+
+<a align="center" rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img align="center" alt="Licenza Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">Implementazione di un sistema mobile ed autonomo per la ricerca di oggetti in base al colore</span> di<a xmlns:cc="http://creativecommons.org/ns#" href="https://github.com/mariotsi/Bachelor-Thesis" property="cc:attributionName" rel="cc:attributionURL"> Simone Mariotti</a> è distribuito con Licenza <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribuzione - Condividi allo stesso modo 4.0 Internazionale</a>.
