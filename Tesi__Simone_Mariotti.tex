@@ -5,6 +5,8 @@
 \def\laureando{Simone Mariotti}       % INSERTIRE NOME COGNOME LAUREANDO
 \def\annoaccademico{2013-2014}    % INSERIRE ANNO ACCADEMICO
 \def\dedica{TODO: DEDICA}      % INSERIRE DEDICA
+\title{\begin{large}\textbf{\titolotesi}\end{large}}
+\author{\laureando}
 %%%%%% File previsti in input:
 %% introduzione.tex    (deve contenere solo il testo, senza \chapter{})
 %% capitolo1.tex       (deve iniziare con \chapter{titolo capitolo})
@@ -16,19 +18,20 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Title Page
-\title{\begin{large}\textbf{\titolotesi}\end{large}}
-\author{\laureando}
+
 \usepackage[utf8]{inputenc}
 \usepackage[italian]{babel}
 \usepackage{fancyhdr}
 
 %\usepackage[hidelinks]{hyperref}
 \usepackage{hyperref}
-\fancyhf{}
-%\fancyhead[RO]{\the\chaptermark}
-%\[LE,RO]{\bfseries\thepage \hfil}
+
 \usepackage{epsfig}
-\pagenumbering{roman}
+\addto\captionsitalian{%
+  \renewcommand{\listfigurename}{Elenco delle immagini}%  
+}
+
+\pagenumbering{Roman}
 %\usepackage{setspace}
 \newlength\sinistra
 \newlength\corpo
@@ -44,8 +47,7 @@
 
 \begin{document}
 \begin{titlepage}
-%\maketitle
- \begin{center}
+\begin{center}
 \textsc{\Large Universit\`a degli Studi di Perugia}\medskip\\
 
 {\Large Facolt\`a di Scienze Matematiche, Fisiche e Naturali}\medskip\\
@@ -54,30 +56,21 @@
 
 {\small \textsc{Corso di Laurea in Informatica}}\medskip\\
 
-%\vspace*{12mm}
-
 \vspace*{5mm}
 
 \includegraphics[scale=0.2]{immagini/logouni.png}
 
-%\vspace*{-2.5cm}
-
 \Large Tesi di Laurea \par\bigskip
-
-%\vfill
-
-%\vspace*{0.3cm}
 
 {\large \bf \titolotesi \par}
 
 \bigskip\bigskip
 
 \end{center}\par
-%\vspace*{0.5cm}\large
 
 \hspace{0.5cm}Laureando\hspace{7.3cm}Relatori\par
 
-\hspace{0.0cm}\emph{\laureando}\hfill\emph{Prof.~Osvaldo Gervasi}\\
+\hspace{0.0cm}\emph{\laureando}\hfill\emph{Prof.~Marco Baioletti}\\
 \ \ \hspace*{3.0cm}\hfill\emph{Dott.~Emanuele Palazzetti}\\
 
 \begin{center}
@@ -89,7 +82,10 @@ Anno Accademico \annoaccademico
 \end{center}
 
 \end{titlepage}
+
+%%%% DEDICA
 \newpage
+\thispagestyle{empty}
 \vspace*{2.5cm}
 \begin{flushright}
 \begin{Large}\emph{\dedica}\end{Large}
@@ -100,19 +96,27 @@ Anno Accademico \annoaccademico
 %\chapter*{Ringraziamenti}
 %Voglio ringraziare ....
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\tableofcontents
-\addcontentsline{toc}{chapter}{Elenco delle immagini}
-\listoffigures
-\pagenumbering{arabic}
-%%%% fine prologo
-%%%% Inizio corpo tesi
-\pagestyle{fancy}
-\fancyhead[RO]{\bfseries Introduzione}
-\fancyfoot[LE,RO]{\thepage \hfil}
-\input{introduzione}        %Il testo delkl'introduzione e' in un file esterno: "introduzione.tex"
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Capitolo 1
+%%%% INDICE
+\thispagestyle{empty}
+\tableofcontents
+
+
+
+\fancyhf{}
+\pagestyle{fancy}
+%%%% fine prologo
+
+%%%% Inizio corpo tesi
+
+%%%% Introduzione  
+\newpage
+\pagenumbering{arabic}
+\input{introduzione}        %Il testo dell'introduzione e' in un file esterno: "introduzione.tex"
+
+
+
+%%%% CAPITOLI
 %\chapter{Titolo capitolo primo}                 %%% OGNI CAPITOLO INIZIERA' CON QUESTE DUE ISTRUZIONI!
 %\fancyhead[RO]{\bfseries Titolo capitolo primo} %%%
 
@@ -123,22 +127,30 @@ Anno Accademico \annoaccademico
 
 
 
-%%% .....
-%%%%%%%%%%%% CONCLUSIONI   (non numerate come per l'introduzione) 
-\addcontentsline{toc}{chapter}{Conclusioni}
-\fancyhead[RO]{\bfseries Conclusioni}
+%%%% CONCLUSIONI   (non numerate come per l'introduzione) 
+\newpage
 \input{conclusioni}
-%%%%%%%%%%%% BIBLIOGRAFIA
+
+
+
+%%%% BIBLIOGRAFIA
 \newpage 
-\addcontentsline{toc}{chapter}{Bibliografia}
 \input{bibliografia}     %conterra' una serie di istruzioni del tipo:    
                          % \bibitem{eol} O. Gervasi and A. Lagan‡ "EOL: A Web-Based Distance Assessment System", 
 			 % Lecture Notes in Computer Science, 3044, Springer & Verlag, pp. 854-862 (2004)
 
+
+
+%%%% ELENCO DELLE IMMAGINI
+\newpage
+\listoffigures
+\addcontentsline{toc}{chapter}{Elenco delle immagini}
+
+
+
 %%%% APPENDICE CON IL CODICE SVILUPPATO
 \appendix
 \linespread{1}
-\fancyhead[RO]{\bfseries Codice}
 \input{appendice}
 %%%%%%%%%%%%%%%%%%%
 %%%%% ESEMPIO:
