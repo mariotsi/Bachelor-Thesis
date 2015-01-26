@@ -63,8 +63,57 @@ Per dare la giusta stabilità e manovrabilità al robot si è deciso di usare un
  accessibili.
 \subsection {Sensori}
 \subsubsection{Sensore di riflessività - QRD1114}
-Avevamo la necessità di fornire al robot un modo per rilevare eventuali sconfinamenti dall'ambiente di test che fosse il più flessibile possibile. Abbiamo optato per il sensore di riflessività QRD1114 prodotto dalla Fairchild Semiconductor: questo sensore è costituito da un LED infrarosso e un fototransistor tarato sulla luce infrarossa e con filtro per la luce solare onde evitare disturbi. Il robot era stato pensato per lavorare su un tavolo o altra superficie con spigoli netti: per rilevare l'imminente caduta in questo tipo di ambiente sarebbe stato sufficiente un sensore di distanza puntato verso terra. Con il sensore di riflessività abbiamo reso possibile l'utilizzo in terra o comunque in ambienti estesi delimitati da un recinto spesso circa 10cm realizzato con materiale a basse riflettività come del semplice cartoncino nero opaco. Il sensore non fa differenza tra il cartoncino nero o lo spazio a fianco di un tavolo, rileva semplicemente una riflessività vicina allo zero. Il sensore così come fornito dal produttore non è direttamente utilizzabile, per far si che Arduino potesse acquisire dal sensore valori proporzionali alla riflessività del materiale in esame abbiamo dovuto realizzare un circuito elettronico di interfaccia. Il circuito alimenta il LED tramite una resistenza da 220$\Omega$ (\textit{R1}) e collega $V_{CC}$\footnote{3,3 V nell'Arduino DUE} al collettore del fototransistor tramite una resistenza da 10 $k\Omega$ (\textit{R2}) mentre l'emettitore è collegato a terra; il punto da cui prelevare il segnale ($V_{OUT}$) è tra \textit{R2} e il collettore. Il principio alla base del circuito è semplice: il LED è sempre acceso e illumina in modo diffuso parallelamente al fototransistor. Il fototransistor in assenza di luce o, nel nostro caso, in presenza di una bassa riflessività si trova in stato di interdizione; i pin di Arduino impostati come input sono in configurazione ``alta impedenza'', equivalenti ad un interruttore aperto dal punto di vista circuitale, quindi non c'è passaggio di corrente né tramite il transistor né tramite la resistenza \textit{R2} il che porta esattamente il valore di $V_{cc}$ in ingresso ad Arduino. Quando il fototransistor è totalmente illuminato, cioè in presenza di alta riflessività, entra in stato di conduzione così che nel punto $V_{OUT}$ si venga a trovare la massa. Ogni stato intermedio di illuminazione equivale ad una conduzione parziale del fotoresistore a cui corrisponde una tensione proporzionale alla riflessività sul pin $V_{OUT}$. Il sensore può essere utilizzato in modalità digitale o analogica semplicemente collegando il pin $V_{OUT}$ ad un pin digitale o analogico e cambiando la configurazione relativa all'interno della programmazione di Arduino. La configurazione digitale si è rivelata inadatta all'applicazione in quanto l'intervallo di valori che rappresenta un oggetto riflette nelle immediate vicinanze del sensore, e quindi lo stato di normale funzionamento, è troppo stretto e anche un minimo sussulto manda il robot in allarme sconfinamento. La configurazione analogica invece ci permette di avere circa 1024 valori discreti dal trasduttore, abbiamo quindi impostato una soglia oltre la quale il robot va in allarme sconfinamento; è importante notare che questa libertà nello scegliere una soglia di allarme ci permette di effettuare una calibrazione affinata in base al materiale su cui si svolge il test per minimizzare la possibilità di falsi positivi. 
-
+Avevamo la necessità di fornire al robot un modo per rilevare eventuali 
+sconfinamenti dall'ambiente di test che fosse il più flessibile possibile. 
+Abbiamo optato per il sensore di riflessività QRD1114 prodotto dalla Fairchild 
+Semiconductor: questo sensore è costituito da un LED infrarosso e un 
+fototransistor tarato sulla luce infrarossa e con filtro per la luce solare 
+onde evitare disturbi. Il robot era stato pensato per lavorare su un tavolo o 
+altra superficie con spigoli netti: per rilevare l'imminente caduta in questo 
+tipo di ambiente sarebbe stato sufficiente un sensore di distanza puntato 
+verso terra. Con il sensore di riflessività abbiamo reso possibile l'utilizzo 
+in terra o comunque in ambienti estesi delimitati da un recinto spesso circa 
+10cm realizzato con materiale a basse riflettività come del semplice 
+cartoncino nero opaco. Il sensore non fa differenza tra il cartoncino nero o 
+lo spazio a fianco di un tavolo, rileva semplicemente una riflessività vicina 
+allo zero. Il sensore così come fornito dal produttore non è direttamente 
+utilizzabile, per far si che Arduino potesse acquisire dal sensore valori 
+proporzionali alla riflessività del materiale in esame abbiamo dovuto 
+realizzare un circuito elettronico di interfaccia. 
+\begin{figure}[!htb] \center
+\includegraphics[ scale=0.2]{immagini/QRD1114.png}
+\caption{Circuito di interfaccia tra Arduino e il sensore QRD1114} 
+\end{figure}
+Il circuito alimenta il LED tramite una resistenza da 220$\Omega$ (\textit{R1}) 
+e collega $V_{CC}$\footnote{pari a 3,3 $V$ nell'Arduino DUE} al collettore del 
+fototransistor tramite una resistenza da 10 $k\Omega$ (\textit{R2}) mentre 
+l'emettitore è collegato a terra; il punto da cui prelevare il segnale ($V_{OUT
+}$) è tra \textit{R2} e il collettore. Il principio alla base del circuito è 
+semplice: il LED è sempre acceso e illumina in modo diffuso parallelamente al 
+fototransistor. Il fototransistor in assenza di luce o, nel nostro caso, in 
+presenza di una bassa riflessività si trova in stato di interdizione; i pin di 
+Arduino impostati come input sono in configurazione ``alta impedenza'', 
+equivalenti ad un interruttore aperto dal punto di vista circuitale, quindi 
+non c'è passaggio di corrente né tramite il transistor né tramite la 
+resistenza \textit{R2} il che porta esattamente il valore di $V_{cc}$ in 
+ingresso ad Arduino. Quando il fototransistor è totalmente illuminato, cioè in 
+presenza di alta riflessività, entra in stato di conduzione così che nel punto 
+$V_{OUT}$ si venga a trovare la massa. Ogni stato intermedio di illuminazione 
+equivale ad una conduzione parziale del fotoresistore a cui corrisponde una 
+tensione proporzionale alla riflessività sul pin $V_{OUT}$. Il sensore può 
+essere utilizzato in modalità digitale o analogica semplicemente collegando il 
+pin $V_{OUT}$ ad un pin digitale o analogico e cambiando la configurazione 
+relativa all'interno della programmazione di Arduino. La configurazione 
+digitale si è rivelata inadatta all'applicazione in quanto l'intervallo di 
+valori che rappresenta un oggetto riflette nelle immediate vicinanze del 
+sensore, e quindi lo stato di normale funzionamento, è troppo stretto e anche 
+un minimo sussulto manda il robot in allarme sconfinamento. La configurazione 
+analogica invece ci permette di avere circa 1024 valori discreti dal 
+trasduttore, abbiamo quindi impostato una soglia oltre la quale il robot va in 
+allarme sconfinamento; è importante notare che questa libertà nello scegliere 
+una soglia di allarme ci permette di effettuare una calibrazione affinata in 
+base al materiale su cui si svolge il test per minimizzare la possibilità di 
+falsi positivi. 
 \section{Software}
 \subsection {OpenCV}
 \subsection {ADK}
