@@ -53,14 +53,14 @@ Per dare la giusta stabilità e manovrabilità al robot si è deciso di usare un
  Chassis - Tank Version''. Questa piattaforma, appositamente pensata per la 
  realizzazione di robot multifunzione, si è rivelata la scelta perfetta in 
  quanto possiede due potenti motori DC già forniti di riduttori 48:1 per 
- affrontare terreni impervi e scoscesi, quattro ruote da 52mm di diametro a 
- cui sono applicati i due cingoli.E' presente anche un alloggiamento per un 
+ affrontare terreni impervi e scoscesi, quattro ruote da 52 mm di diametro a 
+ cui sono applicati i due cingoli. E' presente anche un alloggiamento per un 
  servomotore standard che nella nostra applicazione non è stato usato. 
- L'intelaiatura, di alluminio spesso 2,5mm, presenta numerosi fori e asole per 
- il montaggio di accessorie quali sensori, staffe e motori. Presenta inoltre 
- un ``doppio fondo'' in cui sono alloggiati i motori DC e i riduttori e in cui 
- è possibile sistemare altri componenti che non debbano essere facilmente 
- accessibili.
+ L'intelaiatura, di alluminio spesso 2,5 mm, presenta numerosi fori e asole
+  per il montaggio di accessorie quali sensori, staffe e motori. Presenta
+  inoltre un ``doppio fondo'' in cui sono alloggiati i motori DC e i riduttori 
+  e in cui è possibile sistemare altri componenti che non debbano essere 
+  facilmente accessibili.
 \subsection {Sensori}
 \subsubsection{Sensore di riflessività - QRD1114}
 Avevamo la necessità di fornire al robot un modo per rilevare eventuali 
@@ -81,10 +81,10 @@ utilizzabile, per far si che Arduino potesse acquisire dal sensore valori
 proporzionali alla riflessività del materiale in esame abbiamo dovuto 
 realizzare un circuito elettronico di interfaccia. 
 \begin{figure}[!htb] \center
-\includegraphics[ scale=0.2]{immagini/QRD1114.png}
-\caption{Circuito di interfaccia tra Arduino e il sensore QRD1114} 
+\includegraphics[scale=0.3]{immagini/QRD1114_Circuito.png}
+\caption{Circuito di interfaccia tra Arduino DUE e il sensore QRD1114} 
 \end{figure}
-Il circuito alimenta il LED tramite una resistenza da 220$\Omega$ (\textit{R1}) 
+\\Il circuito alimenta il LED tramite una resistenza da 220$\Omega$ (\textit{R1}) 
 e collega $V_{CC}$\footnote{pari a 3,3 $V$ nell'Arduino DUE} al collettore del 
 fototransistor tramite una resistenza da 10 $k\Omega$ (\textit{R2}) mentre 
 l'emettitore è collegato a terra; il punto da cui prelevare il segnale ($V_{OUT
@@ -95,7 +95,7 @@ presenza di una bassa riflessività si trova in stato di interdizione; i pin di
 Arduino impostati come input sono in configurazione ``alta impedenza'', 
 equivalenti ad un interruttore aperto dal punto di vista circuitale, quindi 
 non c'è passaggio di corrente né tramite il transistor né tramite la 
-resistenza \textit{R2} il che porta esattamente il valore di $V_{cc}$ in 
+resistenza \textit{R2} il che porta esattamente il valore di $V_{CC}$ in 
 ingresso ad Arduino. Quando il fototransistor è totalmente illuminato, cioè in 
 presenza di alta riflessività, entra in stato di conduzione così che nel punto 
 $V_{OUT}$ si venga a trovare la massa. Ogni stato intermedio di illuminazione 
@@ -114,6 +114,11 @@ allarme sconfinamento; è importante notare che questa libertà nello scegliere
 una soglia di allarme ci permette di effettuare una calibrazione affinata in 
 base al materiale su cui si svolge il test per minimizzare la possibilità di 
 falsi positivi. 
+\subsubsection{Sensore di distanza a ultrasuoni - HC-SR04}
+\begin{figure}[!htb] \center
+\includegraphics[scale=0.3]{immagini/HC-SR04_Circuito.png}
+\caption{Circuito di interfaccia tra Arduino DUE e il sensore HC-SR04} 
+\end{figure}
 \section{Software}
 \subsection {OpenCV}
 \subsection {ADK}
