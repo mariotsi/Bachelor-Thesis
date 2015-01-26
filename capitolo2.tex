@@ -4,12 +4,9 @@
 \subsection{UDOO Quad}
 UDOO è un progetto tutto italiano di una piattaforma hardware destinata alla 
 generazione dei ``makers'', cioè quelle persone che vogliono realizzare i 
-proprie progetti bcon le tecnologia a basso costo ad oggi disponibili. La 
-scheda ha visto la luce dopo una soprendente campagna di crowdfunding\footnote{
-dall'inglese crowd, folla e funding, finanziamento. In italiano finanziamento 
-collettivo.} terminata l'8 Giugno 2013 con 4172 donazioni per un totale di \$
-641.612 a fronte di \$27.000 richiesti per iniziare la produzione. Per 
-permettere l'utilizzo di librerie e applicazioni computazionalmente pesanti 
+proprie progetti con le tecnologia a basso costo ad oggi disponibili. La 
+scheda ha visto la luce dopo una sorprendente campagna di crowdfunding
+\footnote{dall'inglese crowd, folla e funding, finanziamento. In italiano finanziamento collettivo.} terminata l'8 Giugno 2013 con 4172 donazioni per un totale di \$641.612 a fronte di \$27.000 richiesti per iniziare la produzione. Per permettere l'utilizzo di librerie e applicazioni computazionalmente pesanti 
 come openCV, PureData e altre UDOO monta un processore ARM Freescale i.MX6 
 Cortex-A9 Quad core 1GHz che supporta sia Android che Linux. Il tutto è 
 completato da una GPU Vivante, 1GB di RAM DDR3, numerose porte di I/O come 
@@ -42,7 +39,7 @@ Freescale i.MX6 tramite un bus interno e quindi viene rilevato come una
 normale periferica USB da Linux; su Android la comunicazione tra i due 
 dispositivi avviene sullo stesso bus ma usa lo standard USB OTG\footnote{On-The
 -Go è una specifica che permettere di agire come host ad un qualsiasi  
-dispositivo (tipicamente smartphone e table). A differenza dell'USB classico 
+dispositivo (tipicamente smartphone e tablet). A differenza dell'USB classico 
 l'OTG è driver-less, cioè non necessita l'installazione di driver specifici 
 per ogni dispositivo}. L'interconnessione tra l'accessorio Arduino e 
 l'applicazione Android è realizzata tramite l'ADK\footnote{Android Development 
@@ -65,7 +62,8 @@ Per dare la giusta stabilità e manovrabilità al robot si è deciso di usare un
  è possibile sistemare altri componenti che non debbano essere facilmente 
  accessibili.
 \subsection {Sensori}
-\subsubsection{}
+\subsubsection{Sensore di riflessività - QRD1114}
+Avevamo la necessità di fornire al robot un modo per rilevare eventuali sconfinamenti dall'ambiente di test che fosse il più flessibile possibile. Abbiamo optato per il sensore di riflessività QRD1114 prodotto dalla Fairchild Semiconductor: questo sensore è costituito da un LED infrarosso e un fototransistor tarato sulla luce infrarossa e con filtro per la luce solare onde evitare disturbi. Il robot era stato pensato per lavorare su un tavolo o altra superficie con spigoli netti: per rilevare l'imminente caduta in questo tipo di ambiente sarebbe stato sufficiente un sensore di distanza puntato verso terra. Con il sensore di riflessività abbiamo reso possibile l'utilizzo in terra o comunque in ambienti estesi delimitati da un recinto spesso circa 10cm realizzato con materiale a basse riflettività come del semplice cartoncino nero opaco. Il sensore non fa differenza tra il cartoncino nero o lo spazio a fianco di un tavolo, rileva semplicemente una riflessività vicina allo zero. Il sensore così come fornito dal produttore non è direttamente utilizzabile, per far si che Arduino potesse acquisire dal sensore valori proporzionali alla riflessività del materiale in esame abbiamo dovuto realizzare un circuito elettronico di interfaccia. Il circuito alimenta il LED tramite una resistenza da 220$\Omega$ (\textit{R1}) e collega $V_{CC}$\footnote{3,3 V nell'Arduino DUE} al collettore del fototransistor tramite una resistenza da 10 $k\Omega$ (\textit{R2}) mentre l'emettitore è collegato a terra; il punto da cui prelevare il segnale ($V_{OUT}$) è tra \textit{R2} e il collettore. Il principio alla base del circuito è semplice: il LED è sempre acceso e illumina in modo diffuso parallelamente al fototransistor. Il fototransistor in assenza di luce o, nel nostro caso, in presenza di una bassa riflessività si trova in stato di interdizione; i pin di Arduino impostati come input sono in configurazione ``alta impedenza'', equivalenti ad un interruttore aperto dal punto di vista circuitale, quindi non c'è passaggio di corrente né tramite il transistor né tramite la resistenza \textit{R2} il che porta esattamente il valore di $V_{cc}$ in ingresso ad Arduino. Quando il fototransistor è totalmente illuminato, cioè in presenza di alta riflessività, entra in stato di conduzione così che nel punto $V_{OUT}$ si venga a trovare la massa. Ogni stato intermedio di illuminazione equivale ad una conduzione parziale del fotoresistore a cui corrisponde una tensione proporzionale alla riflessività sul pin $V_{OUT}$. Il sensore può essere utilizzato in modalità digitale o analogica semplicemente collegando il pin $V_{OUT}$ ad un pin digitale o analogico e cambiando la configurazione relativa all'interno della programmazione di Arduino. La configurazione digitale si è rivelata inadatta all'applicazione in quanto l'intervallo di valori che rappresenta un oggetto riflette nelle immediate vicinanze del sensore, e quindi lo stato di normale funzionamento, è troppo stretto e anche un minimo sussulto manda il robot in allarme sconfinamento. La configurazione analogica invece ci permette di avere circa 1024 valori discreti dal trasduttore, abbiamo quindi impostato una soglia oltre la quale il robot va in allarme sconfinamento; è importante notare che questa libertà nello scegliere una soglia di allarme ci permette di effettuare una calibrazione affinata in base al materiale su cui si svolge il test per minimizzare la possibilità di falsi positivi. 
 
 \section{Software}
 \subsection {OpenCV}
