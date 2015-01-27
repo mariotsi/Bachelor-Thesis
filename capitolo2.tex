@@ -115,6 +115,40 @@ una soglia di allarme ci permette di effettuare una calibrazione affinata in
 base al materiale su cui si svolge il test per minimizzare la possibilità di 
 falsi positivi. 
 \subsubsection{Sensore di distanza a ultrasuoni - HC-SR04}
+Il robot aveva bisogno di conoscere la distanza degli oggetti che si trovavano 
+di fronte ad esso, la scelta è ricaduta un sensore ad ultrasuoni, a discapito di
+ uno ad infrarossi, per la totale assenza di disturbi dovuti all'illuminazione 
+ dell'ambiente di test. In particolare abbiamo scelto il sensore HC-SR04 che 
+ offre ottime prestazioni, è facile da integrare ed è di dimensioni contenute.\\
+Il sensore può rilevare oggetti distanti da 2 cm a 400 cm con una risoluzione 
+di 0,3 cm entro un cono frontale con apertura di 60$^\circ$, 30$^\circ$ per lato 
+rispetto alla perpendicolare dal sensore.
+\begin{figure}[!htb] \center
+\includegraphics[scale=0.6]{immagini/HC-SR04_Angle.png}
+\caption{Risposta del sensore rispetto alla posizione dell'ostacolo} 
+\end{figure}
+\\Il collegamento alla piattaforma di sviluppo è effettuato tramite quattro pin: 
+\textit{$+5V$}, \textit{trig}, \textit{echo} e \textit{GND}.
+Il funzionamento è piuttosto semplice, una volta alimentato il sensore si invia 
+sul pin \textit{trig} un impulso di durata $10 \mu$s, il sensore invia 
+quindi un impulso ultrasonico e restituisce sul pin \textit{echo} un segnale 
+positivo di durata pari al tempo di percorrenza andata e ritorno del segnale 
+ultrasonico. Una volta ottenuto il tempo di percorrenza si utilizza la formula 
+del moto rettilineo uniforme:
+$$v = \frac{\Delta s}{\Delta t}$$
+sapendo che la velocità del suono a 20 $^\circ$C è approssimabile a 344 m/s allora 
+la durata dell'impulso di $echo$ sarà compreso tra 116.3 $\mu$s e 23,26 ms 
+rispettivamente per distanze percorse di 4 cm (2+2) e di 8 m (4+4).
+\\Per ricavare la distanza ($d$) in centimetri a partire dalla durata dell'impulso 
+notando che 344 m/s = 29,1 cm/$\mu$s e indicando con $T_e$ la durata dell'impulso 
+di echo usiamo:
+$$d=\frac{T_e}{2\cdot29,1}$$
+Se la nostra scheda accettasse input a 5 V questo sensore non avrebbe bisogno di 
+nessun accorgimento per essere collegato, purtroppo però anche se la nostra UDOO 
+e l'Arduino DUE in essa integrato possono fornire alimentazione a 5 V non possono 
+accettare input allo stesso voltaggio ma solo a 3,3 V. Allo stesso modo del 
+sensore QRD1114 ci server un circuito di interfaccia ma prima 
+
 \begin{figure}[!htb] \center
 \includegraphics[scale=0.3]{immagini/HC-SR04_Circuito.png}
 \caption{Circuito di interfaccia tra Arduino DUE e il sensore HC-SR04} 
