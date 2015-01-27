@@ -143,17 +143,88 @@ rispettivamente per distanze percorse di 4 cm (2+2) e di 8 m (4+4).
 notando che 344 m/s = 29,1 cm/$\mu$s e indicando con $T_e$ la durata dell'impulso 
 di echo usiamo:
 $$d=\frac{T_e}{2\cdot29,1}$$
-Se la nostra scheda accettasse input a 5 V questo sensore non avrebbe bisogno di 
-nessun accorgimento per essere collegato, purtroppo però anche se la nostra UDOO 
-e l'Arduino DUE in essa integrato possono fornire alimentazione a 5 V non possono 
-accettare input allo stesso voltaggio ma solo a 3,3 V. Allo stesso modo del 
-sensore QRD1114 ci server un circuito di interfaccia ma prima 
+Per quanto riguarda il collegamento ad Arduino se la nostra scheda accettasse 
+input a 5 V questo sensore non avrebbe bisogno di nessun accorgimento per essere
+ collegato, purtroppo però, anche se la nostra UDOO 
+e l'Arduino DUE in essa integrato possono fornire alimentazione a 5 V, non possono 
+accettare input allo stesso voltaggio ma solo a 3,3 V. 
+\\Allo stesso modo del sensore QRD1114 ci serve un circuito di interfaccia che 
+in questo caso sarà un semplice partitore di tensione il cui schema generico è 
+riportato di seguito
+
+\begin{figure}[!htb] \center
+\includegraphics[scale=0.6]{immagini/Voltage_divider.png}
+\caption{Schema generico partitore di tensione} 
+\end{figure}
+
+Il partitore di tensione, a fronte di un noto valore di tensione di ingresso 
+$V_{IN}$ riesce a fornirci il valore di tensione desiderato in uscita $V_{OUT}$ 
+tramite due resistenze opportunamente dimensionate. 
+
+La formula che regola il partitore di tensione è la seguente
+$$V_{OUT}=V_{IN}\cdot\frac{R_2}{R_1+R_2}$$
+nel nostro caso $V_{IN}$ = 5 V e $V_{OUT}$ = 3,3 V quindi scegliendo arbitrariamente 
+il valore di $R_1$ 1 k$\Omega$ ricaviamo semplicemente il valore di $R_2$ tramite 
+la formula inversa $$R_2 = R_1\cdot\frac{V_{OUT}}{V_{IN}-V_{OUT}}$$
+che da come risultato 1941,48 $\Omega$; approssimando il valore appena calcolato
+al più vicino taglio standard di resistenze, cioè $R_2 $ = 2 k$\Omega$, si ottiene $V_{OUT}$
+ = $3,\overline{3}$ che è assolutamente accettabile.
 
 \begin{figure}[!htb] \center
 \includegraphics[scale=0.3]{immagini/HC-SR04_Circuito.png}
 \caption{Circuito di interfaccia tra Arduino DUE e il sensore HC-SR04} 
 \end{figure}
+
 \section{Software}
 \subsection {OpenCV}
 \subsection {ADK}
+In Android, a partire dalla versione 3.1, è supportato il protocollo Android Open 
+Accessory (AOA), 
+ogni accessorio sviluppato per Android deve supportare lo stesso protocollo. 
+\\A causa della limitata autonomia dei dispositivi su cui Android è maggiormente 
+utilizzato (smarthphone e tablet) l'AOA impone che l'accessorio funga da host 
+e alimenti quindi il bus utlizzato
+\\Per usare Arduino come un accessorio per Android e rispettare lo standard AOA 
+esiste la libreria \textit{adk.h} che permette di dialogare con un dispositivo 
+Android dopo un'accurata configurazione. Android distingue diversi accessori 
+sulla base di informazioni che ogni accessorio fornisce all'atto della connessione, 
+queste informazioni sono:
+\begin{itemize}
+\item Vendor
+\item Name
+\item Longname
+\item Version
+\item Url
+\item Serial
+\end{itemize} 
+Il dispositivo Android accetterà la richiesta di connessione solo se le stringhe 
+identificative in suo possesso combaciano perfettamente con quelle fornite 
+dall'accessorio. Per ottenere effettivamente la connessione bisogna indicare ad 
+Android quali sono gli accessori supportati e quale applicazioni è in grado di 
+gestire un particolare accessorio. Questo si ottiene inserendo la successiva 
+direttiva nel Manifest file dell'App
+
+\lstset{language=XML}
+
+\begin{lstlisting}[caption=Porzione del Manifest file dell'App]
+...
+<meta-data
+    android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
+    android:resource="@xml/usb_accessory_filter" />
+...
+\end{lstlisting}
+In questo modo alla connessione di qualsiasi accessorio sarà il sistema operativo
+a suggerire di aprire una certa app se l'accessorio connesso è presente nel file 
+usb\_accessory\_filter.xml associato.
+\\Nel nostro caso il file usb\_accessory\_filter.xml si presenta così
+\begin{lstlisting}[caption=usb\_accessory\_filter.xml]
+<resources>
+    <usb-accessory
+            version="0.1.0"
+            model="Mobile-Tanker"
+            manufacturer="Simone Mariotti"/>
+</resources>
+\end{lstlisting}
+Le stesse identiche stringhe sono impostate durante la fase di configurazione di 
+Arduino in modo da permette l'accoppiamento.
 \subsection {ADK Toolkit}
