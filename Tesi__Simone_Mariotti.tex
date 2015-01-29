@@ -22,11 +22,44 @@
 \usepackage[utf8]{inputenc}
 \usepackage[italian]{babel}
 \usepackage{fancyhdr}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{textcomp}
+\usepackage{gensymb}
+
+\definecolor{dkgreen}{RGB}{0,51,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\renewcommand{\lstlistingname}{Codice}
+
+\definecolor{Maroon}{RGB}{127,2,2}
+
+\lstdefinelanguage{XML}
+{
+frame=tb, 
+showstringspaces=false,
+  basicstyle=\ttfamily\footnotesize,
+  morestring=[b]",
+  moredelim=[s][\bfseries\color{Maroon}]{<}{\ },
+  moredelim=[s][\bfseries\color{Maroon}]{</}{>},
+  moredelim=[l][\bfseries\color{Maroon}]{/>},
+  moredelim=[l][\bfseries\color{Maroon}]{>},
+  morecomment=[s]{<?}{?>},
+  morecomment=[s]{<!--}{-->},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{blue},
+  identifierstyle=\color{red},  
+frame=tb
+}
 
 %\usepackage[hidelinks]{hyperref}
 \usepackage{hyperref}
 
 \usepackage{epsfig}
+\fancyhf{}	 
+
 \addto\captionsitalian{%
   \renewcommand{\listfigurename}{Elenco delle immagini}%  
 }

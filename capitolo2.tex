@@ -1,5 +1,7 @@
 %!TEX root = Tesi__Simone_Mariotti.tex
 \chapter{Componenti del robot}
+\fancyhead[R]{\bfseries Componenti del robot} 	 	
+\fancyfoot[C]{\thepage } 
 \section{Hardware}
 \subsection{UDOO Quad}
 UDOO è un progetto tutto italiano di una piattaforma hardware destinata alla 
@@ -154,7 +156,7 @@ riportato di seguito
 
 \begin{figure}[!htb] \center
 \includegraphics[scale=0.6]{immagini/Voltage_divider.png}
-\caption{Schema generico partitore di tensione} 
+\caption{Schema generico del partitore di tensione} 
 \end{figure}
 
 Il partitore di tensione, a fronte di un noto valore di tensione di ingresso 
@@ -170,7 +172,7 @@ che da come risultato 1941,48 $\Omega$; approssimando il valore appena calcolato
 al più vicino taglio standard di resistenze, cioè $R_2 $ = 2 k$\Omega$, si ottiene $V_{OUT}$
  = $3,\overline{3}$ che è assolutamente accettabile.
 
-\begin{figure}[!htb] \center
+\begin{figure}[H] \center
 \includegraphics[scale=0.3]{immagini/HC-SR04_Circuito.png}
 \caption{Circuito di interfaccia tra Arduino DUE e il sensore HC-SR04} 
 \end{figure}
@@ -209,7 +211,8 @@ direttiva nel Manifest file dell'App
 \begin{lstlisting}[caption=Porzione del Manifest file dell'App]
 ...
 <meta-data
-    android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
+    android:name="android.hardware.usb.action.
+    				USB_ACCESSORY_ATTACHED"
     android:resource="@xml/usb_accessory_filter" />
 ...
 \end{lstlisting}
@@ -225,6 +228,60 @@ usb\_accessory\_filter.xml associato.
             manufacturer="Simone Mariotti"/>
 </resources>
 \end{lstlisting}
-Le stesse identiche stringhe sono impostate durante la fase di configurazione di 
-Arduino in modo da permette l'accoppiamento.
+Le stesse identiche stringhe saranno impostate durante la fase di configurazione 
+di Arduino in modo da permette l'accoppiamento.
 \subsection {ADK Toolkit}
+L'ADK toolkit è una libreria che aggiunge un grado di astrazione all'ADK, l'invio
+ e la ricezione dei messaggi sono semplificati così come l'inizializzazione della 
+ connessione.\\
+Il toolkit si basa su due classi principali: AdkManager e AdkMessage.	\\	
+AdkManager espone metodi per la gestione della connessione e per l'invio e la 
+ricezioni di dati. AdkMessage rappresenta il messaggio ricevuto dall'accessorio 
+ne suo formato nativo, cioè un array di byte; tramite dei metodi ausiliari, 
+\textit{getString()}, \textit{getFloat()}, \textit{getInt()}, è possibile 
+ottenere una versione tipizzata del messaggio e naturalmente la versione ``grezza'' 
+dei dati con \textit{getBytes()} e \textit{getByte()}.\\
+Grazie a questa libreria l'uso dell'ADK, originariamente poco intuitivo, diventa 
+efficiente ed elegante
+\lstset{
+language=Java,
+frame=tb,  
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  identifierstyle=\color{black},
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+\begin{lstlisting}[caption=Inizializzazione della connessione con l'accessorio]
+private AdkManager mAdkManager;
+
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    // ...
+    mAdkManager = new AdkManager(this);
+}
+
+@Override
+protected void onResume() {
+    super.onResume();
+    mAdkManager.open();
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=Lettura e scrittura dati]
+// Write
+adkManager.write("Ciao da Android!");
+
+// Read
+AdkMessage response = adkManager.read();
+System.out.println(response.getString());
+// Could outputs: "Ciao da Arduino!"
+\end{lstlisting}
