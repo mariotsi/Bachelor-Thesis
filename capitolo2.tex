@@ -1,9 +1,8 @@
 %!TEX root = Tesi__Simone_Mariotti.tex
-\chapter{Componenti del robot}
-\fancyhead[R]{\bfseries Componenti del robot} 	 	
+\chapter{Componenti hardware}
+\fancyhead[R]{\bfseries Componenti hardware} 	 	
 \fancyfoot[C]{\thepage } 
-\section{Hardware}
-\subsection{UDOO Quad}
+\section{UDOO Quad}
 UDOO è un progetto tutto italiano di una piattaforma hardware destinata alla 
 generazione dei ``makers'', cioè quelle persone che vogliono realizzare i 
 proprie progetti con le tecnologia a basso costo ad oggi disponibili. La 
@@ -48,7 +47,7 @@ l'applicazione Android è realizzata tramite l'ADK\footnote{Android Development
 Kit} 2012, di cui parleremo più avanti in questo stesso capitolo, che permette 
 l'integrazione delle più disparate periferiche a dispositivi Android tramite 
 una connessione USB o Bluetooth.
-\subsection {Tank Kit}
+\section {Tank Kit}
 Per dare la giusta stabilità e manovrabilità al robot si è deciso di usare una
  locomozione a cingoli che richiede solo due motori e permette di ruotare sul 
  posto o comunque in spazi ristretti: la nostra scelta è stata il ``Multi-
@@ -63,8 +62,8 @@ Per dare la giusta stabilità e manovrabilità al robot si è deciso di usare un
   inoltre un ``doppio fondo'' in cui sono alloggiati i motori DC e i riduttori 
   e in cui è possibile sistemare altri componenti che non debbano essere 
   facilmente accessibili.
-\subsection {Sensori}
-\subsubsection{Sensore di riflessività - QRD1114}
+\section {Sensori}
+\subsection{Sensore di riflessività - QRD1114}
 Avevamo la necessità di fornire al robot un modo per rilevare eventuali 
 sconfinamenti dall'ambiente di test che fosse il più flessibile possibile. 
 Abbiamo optato per il sensore di riflessività QRD1114 prodotto dalla Fairchild 
@@ -116,7 +115,7 @@ allarme sconfinamento; è importante notare che questa libertà nello scegliere
 una soglia di allarme ci permette di effettuare una calibrazione affinata in 
 base al materiale su cui si svolge il test per minimizzare la possibilità di 
 falsi positivi. 
-\subsubsection{Sensore di distanza a ultrasuoni - HC-SR04}
+\subsection{Sensore di distanza a ultrasuoni - HC-SR04}
 Il robot aveva bisogno di conoscere la distanza degli oggetti che si trovavano 
 di fronte ad esso, la scelta è ricaduta un sensore ad ultrasuoni, a discapito di
  uno ad infrarossi, per la totale assenza di disturbi dovuti all'illuminazione 
@@ -169,7 +168,8 @@ nel nostro caso $V_{IN}$ = 5 V e $V_{OUT}$ = 3,3 V quindi scegliendo arbitrariam
 il valore di $R_1$ 1 k$\Omega$ ricaviamo semplicemente il valore di $R_2$ tramite 
 la formula inversa $$R_2 = R_1\cdot\frac{V_{OUT}}{V_{IN}-V_{OUT}}$$
 che da come risultato 1941,48 $\Omega$; approssimando il valore appena calcolato
-al più vicino taglio standard di resistenze, cioè $R_2 $ = 2 k$\Omega$, si ottiene $V_{OUT}$
+al più vicino taglio standard di resistenze, cioè $R_2 $ = 2 k$\Omega$, si 
+ottiene $V_{OUT}$
  = $3,\overline{3}$ che è assolutamente accettabile.
 
 \begin{figure}[H] \center
@@ -177,111 +177,3 @@ al più vicino taglio standard di resistenze, cioè $R_2 $ = 2 k$\Omega$, si ott
 \caption{Circuito di interfaccia tra Arduino DUE e il sensore HC-SR04} 
 \end{figure}
 
-\section{Software}
-\subsection {OpenCV}
-\subsection {ADK}
-In Android, a partire dalla versione 3.1, è supportato il protocollo Android Open 
-Accessory (AOA), 
-ogni accessorio sviluppato per Android deve supportare lo stesso protocollo. 
-\\A causa della limitata autonomia dei dispositivi su cui Android è maggiormente 
-utilizzato (smarthphone e tablet) l'AOA impone che l'accessorio funga da host 
-e alimenti quindi il bus utlizzato
-\\Per usare Arduino come un accessorio per Android e rispettare lo standard AOA 
-esiste la libreria \textit{adk.h} che permette di dialogare con un dispositivo 
-Android dopo un'accurata configurazione. Android distingue diversi accessori 
-sulla base di informazioni che ogni accessorio fornisce all'atto della connessione, 
-queste informazioni sono:
-\begin{itemize}
-\item Vendor
-\item Name
-\item Longname
-\item Version
-\item Url
-\item Serial
-\end{itemize} 
-Il dispositivo Android accetterà la richiesta di connessione solo se le stringhe 
-identificative in suo possesso combaciano perfettamente con quelle fornite 
-dall'accessorio. Per ottenere effettivamente la connessione bisogna indicare ad 
-Android quali sono gli accessori supportati e quale applicazioni è in grado di 
-gestire un particolare accessorio. Questo si ottiene inserendo la successiva 
-direttiva nel Manifest file dell'App
-
-\lstset{language=XML}
-
-\begin{lstlisting}[caption=Porzione del Manifest file dell'App]
-...
-<meta-data
-    android:name="android.hardware.usb.action.
-    				USB_ACCESSORY_ATTACHED"
-    android:resource="@xml/usb_accessory_filter" />
-...
-\end{lstlisting}
-In questo modo alla connessione di qualsiasi accessorio sarà il sistema operativo
-a suggerire di aprire una certa app se l'accessorio connesso è presente nel file 
-usb\_accessory\_filter.xml associato.
-\\Nel nostro caso il file usb\_accessory\_filter.xml si presenta così
-\begin{lstlisting}[caption=usb\_accessory\_filter.xml]
-<resources>
-    <usb-accessory
-            version="0.1.0"
-            model="Mobile-Tanker"
-            manufacturer="Simone Mariotti"/>
-</resources>
-\end{lstlisting}
-Le stesse identiche stringhe saranno impostate durante la fase di configurazione 
-di Arduino in modo da permette l'accoppiamento.
-\subsection {ADK Toolkit}
-L'ADK toolkit è una libreria che aggiunge un grado di astrazione all'ADK, l'invio
- e la ricezione dei messaggi sono semplificati così come l'inizializzazione della 
- connessione.\\
-Il toolkit si basa su due classi principali: AdkManager e AdkMessage.	\\	
-AdkManager espone metodi per la gestione della connessione e per l'invio e la 
-ricezioni di dati. AdkMessage rappresenta il messaggio ricevuto dall'accessorio 
-ne suo formato nativo, cioè un array di byte; tramite dei metodi ausiliari, 
-\textit{getString()}, \textit{getFloat()}, \textit{getInt()}, è possibile 
-ottenere una versione tipizzata del messaggio e naturalmente la versione ``grezza'' 
-dei dati con \textit{getBytes()} e \textit{getByte()}.\\
-Grazie a questa libreria l'uso dell'ADK, originariamente poco intuitivo, diventa 
-efficiente ed elegante
-\lstset{
-language=Java,
-frame=tb,  
-  aboveskip=3mm,
-  belowskip=3mm,
-  showstringspaces=false,
-  columns=flexible,
-  basicstyle={\small\ttfamily},
-  numbers=none,
-  identifierstyle=\color{black},
-  numberstyle=\tiny\color{gray},
-  keywordstyle=\color{blue},
-  commentstyle=\color{dkgreen},
-  stringstyle=\color{mauve},
-  breaklines=true,
-  breakatwhitespace=true,
-  tabsize=3
-}
-\begin{lstlisting}[caption=Inizializzazione della connessione con l'accessorio]
-private AdkManager mAdkManager;
-
-@Override
-protected void onCreate(Bundle savedInstanceState) {
-    // ...
-    mAdkManager = new AdkManager(this);
-}
-
-@Override
-protected void onResume() {
-    super.onResume();
-    mAdkManager.open();
-}
-\end{lstlisting}
-\begin{lstlisting}[caption=Lettura e scrittura dati]
-// Write
-adkManager.write("Ciao da Android!");
-
-// Read
-AdkMessage response = adkManager.read();
-System.out.println(response.getString());
-// Could outputs: "Ciao da Arduino!"
-\end{lstlisting}
