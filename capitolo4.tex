@@ -1,3 +1,49 @@
 %!TEX root = Tesi__Simone_Mariotti.tex
 \chapter{Implementazione}
-\fancyfoot[C]{\thepage } 
+\fancyhead[R]{\bfseries Implementazine} 	
+\fancyfoot[C]{\thepage }
+\section {Android}
+L'app per Android è stata sviluppata avendo come priorità la modularità. E' 
+infatti molto semplice cambiare totalmente il comportamento del robot o la 
+codifica dei messaggi sostituendo o modificando una singola classe senza 
+coinvolgere il resto del codice.\\
+La modularizzazione a grana più grossa è a livello di package: ci sono tre package,
+ognuno con un compito preciso, e sono \textbf{logic}, \textbf{messaging} e \textbf{opencv}.
+\subsection {Il package \emp{logic}}
+Contiene tre classi: RobotActivity, RobotLogic e UpdateDirections.
+\subsubsection{La classe \emph{RobotActivity}}
+Come suggerisce il nome è l'Activity vera e propria, cioè quella classe che il 
+sistema operativo istanzia all'avvio dell'app. Essa stessa istanzia e prepara tutti gli 
+altri oggetti per l'esecuzione. Implementa due interfacce: \textit{View.OnTouchListener} 
+e \textit{CvCameraViewListener}. 
+La prima permette di gestire gli input da touch screen senza ricorrere ad una classe esterna,
+la seconda è un'interfaccia presente nella libreria OpenCV e permette di ``intercettare''
+i frame proveniente dalla camera prima che vengano renderizzati a schermo tramite 
+l'override del metodo \textit{OnCameraFrame()}. Ogni frame verrà elaborato e solo alla
+fine visualizzato a schermo.
+All'avvio si occupa di inizializzare OpenCV tramite la 
+callback \textit{BaseLoaderCallback} e ottiene il riferimento all'istanza dell'ADK
+tramite l'ADKToolkit. Normalmente sarebbe buona norma interrompere le connessioni 
+quando l'app si prepara allo stato di ``pause'' e cioè nel metodo \emph{onPause()}
+ purtroppo però un bug dell'ADK non permette di ripristinare la connessione una 
+ volta chiusa senza riavviare l'app. Per questa volta quindi andremo contro la 
+ ``best practice'' e lasceremo la connessione sempre attiva ma non mancheremo di 
+ causare un ``graceful shutdown'' al modulo che gestisce la comunicazione in modo 
+ che non consumi risorse inutilmente.
+
+ \subsubsection{La classe \emph{UpdateDirections}}
+ Questa classe è un ``singleton''\footnote{E' un design pattern descritto dalla 
+ cosiddetta ``Gang of four'' nel libro ``Design Patterns''. 
+ Permette la creazione di una sola istanza della classe e ne regola l'accesso. } 
+ e si occupa di mostrare all'utente tramite  immagini e testi quello che  il 
+ robot sta facendo o quale sarà la sua prossima  mossa. Dovendo agire 
+ sull'UI\footnote{User Interface, interfaccia utente} deve essere eseguita sul thread
+ che si occupa dell'UI, per questo implementa l'interfaccia \emph{Runnable} e 
+ ogni sua esecuzione è lanciata  tramite \emph{runOnUiThread()}. 
+ Le informazioni visualizzabili sono limitate e ben distinte,
+ ad ognuna corrisponde un metodo da invocare per visualizzare quella data informazione
+ a schermo. I metodi disponibili sono: left(), right(), aimed(), search(), 
+ found(), show(), hide(), chooseColor(), avoidingLeft(), avoidingRight(), lock(), 
+ unlock().
+
+\section {Arduino} n
