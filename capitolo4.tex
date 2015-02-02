@@ -1,15 +1,18 @@
 %!TEX root = Tesi__Simone_Mariotti.tex
 \chapter{Implementazione}
-\fancyhead[R]{\bfseries Implementazine} 	
+\fancyhead[R]{\bfseries Implementazione} 	
 \fancyfoot[C]{\thepage }
 \section {Android}
 L'app per Android è stata sviluppata avendo come priorità la modularità. E' 
 infatti molto semplice cambiare totalmente il comportamento del robot o la 
 codifica dei messaggi sostituendo o modificando una singola classe senza 
 coinvolgere il resto del codice.\\
-La modularizzazione a grana più grossa è a livello di package: ci sono tre package,
+La modularizzazione a grana più grossa è a livello di package\footnote{Un contenitore 
+che racchiude classi che svolgono compitini affini}: ci sono tre package,
 ognuno con un compito preciso, e sono \textbf{logic}, \textbf{messaging} e \textbf{opencv}.
-\subsection {Il package \emp{logic}}
+\subsection {Il package \textit{logic}}
+Si occupa di reperire le informazioni dal mondo reale e analizzarle al fine di
+eseguire l'azione più adatta.
 Contiene tre classi: RobotActivity, RobotLogic e UpdateDirections.
 \subsubsection{La classe \emph{RobotActivity}}
 Come suggerisce il nome è l'Activity vera e propria, cioè quella classe che il 
@@ -19,7 +22,8 @@ e \textit{CvCameraViewListener}.
 La prima permette di gestire gli input da touch screen senza ricorrere ad una classe esterna,
 la seconda è un'interfaccia presente nella libreria OpenCV e permette di ``intercettare''
 i frame proveniente dalla camera prima che vengano renderizzati a schermo tramite 
-l'override del metodo \textit{OnCameraFrame()}. Ogni frame verrà elaborato e solo alla
+l'override\footnote{Tecnica che permette di ridefinire il comportamento di un metodo 
+ereditato} del metodo \textit{OnCameraFrame()}. Ogni frame verrà elaborato e solo alla
 fine visualizzato a schermo.
 All'avvio si occupa di inizializzare OpenCV tramite la 
 callback \textit{BaseLoaderCallback} e ottiene il riferimento all'istanza dell'ADK
@@ -42,8 +46,20 @@ quando l'app si prepara allo stato di ``pause'' e cioè nel metodo \emph{onPause
  ogni sua esecuzione è lanciata  tramite \emph{runOnUiThread()}. 
  Le informazioni visualizzabili sono limitate e ben distinte,
  ad ognuna corrisponde un metodo da invocare per visualizzare quella data informazione
- a schermo. I metodi disponibili sono: left(), right(), aimed(), search(), 
- found(), show(), hide(), chooseColor(), avoidingLeft(), avoidingRight(), lock(), 
- unlock().
+ a schermo. I metodi disponibili sono: 
+ \begin{itemize}
+ \item \emph{left()}: indica che l'obiettivo è visibile è stato individuato e si trova alla sinistra del robot.
+ \item \emph{right()}: indica che l'obiettivo è visibile è stato individuato e si trova alla destra del robot.
+ \item \emph{aimed()}: indica che l'obiettivo è visibile è stato individuato e si trova esattamente di fronte al robot che si muoverà in quella direzione.
+ \item \emph{search()}: indica che l'obiettivo non è visibile, il robot si muoverà secondo l'algoritmo di ricerca.
+ \item \emph{found()}: indica che l'obiettivo è visibile e il robot si trova a meno di 30 centrimetri.
+ \item \emph{avoidingLeft()}: indica che è presente un ostacolo sul percorso del robot a meno di 30 centimetri. Il robot lo aggirerà verso sinistra. 
+ \item \emph{avoidingRight()}: indica che è presente un ostacolo sul percorso del robot a meno di 30 centimetri. Il robot lo aggirerà verso destra.
+ \item \emph{chooseColor()}: indica che il robot è in attesa che venga impostato il colore da cercare. 
+ \end{itemize}
+ La classe espone anche altri metodi che mostrano (\emph{show()}) o nascondono 
+ (\emph{hide()}) la porzione di interfaccia che visualizza le indicazioni, oppure bloccano (\emph{lock()})
+ e sbloccano (\emph{unlock()}) la possibilità di cambiare le indicazioni visualizzate.
 
+\subsubsection{La classe \emph{RobotLogic}}
 \section {Arduino} n
