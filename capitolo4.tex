@@ -10,6 +10,10 @@ coinvolgere il resto del codice.\\
 La modularizzazione a grana più grossa è a livello di package\footnote{Un contenitore 
 che racchiude classi che svolgono compitini affini}: ci sono tre package,
 ognuno con un compito preciso, e sono \textbf{logic}, \textbf{messaging} e \textbf{opencv}.
+\begin{figure}[H] \center
+\includegraphics[scale=0.2]{immagini/package_diagram.png}
+\caption{Schema di interconnessione dei package} 
+\end{figure}
 \subsection {Il package \textit{logic}}
 Si occupa di reperire le informazioni dal mondo reale e analizzarle al fine di
 eseguire l'azione più adatta.
@@ -27,13 +31,10 @@ ereditato} del metodo \textit{OnCameraFrame()}. Ogni frame verrà elaborato e so
 fine visualizzato a schermo.
 All'avvio si occupa di inizializzare OpenCV tramite la 
 callback \textit{BaseLoaderCallback} e ottiene il riferimento all'istanza dell'ADK
-tramite l'ADKToolkit. Normalmente sarebbe buona norma interrompere le connessioni 
-quando l'app si prepara allo stato di ``pause'' e cioè nel metodo \emph{onPause()}
- purtroppo però un bug dell'ADK non permette di ripristinare la connessione una 
- volta chiusa senza riavviare l'app. Per questa volta quindi andremo contro la 
- ``best practice'' e lasceremo la connessione sempre attiva ma non mancheremo di 
- causare un ``graceful shutdown'' al modulo che gestisce la comunicazione in modo 
- che non consumi risorse inutilmente.
+tramite l'ADKToolkit. E' buona norma interrompere le connessioni e liberare il canale usato 
+nel momento in cui un'app viene chiusa. Per questo nel metodo \emph{onDestroy()} 
+viene chiuso il canale usato per comunicare con Arduino tramite il metodo \emph{close()}
+fornito dall'ADKToolkit.
 
  \subsubsection{La classe \emph{UpdateDirections}}
  Questa classe è un ``singleton''\footnote{E' un design pattern descritto dalla 
@@ -62,4 +63,71 @@ quando l'app si prepara allo stato di ``pause'' e cioè nel metodo \emph{onPause
  e sbloccano (\emph{unlock()}) la possibilità di cambiare le indicazioni visualizzate.
 
 \subsubsection{La classe \emph{RobotLogic}}
-\section {Arduino} n
+La classe \emph{RobotLogic} è il vero ``cervello'' di tutta l'app.\\
+Viene chiamata in causa ogni volta che arriva un nuovo messaggio da Arduino. 
+Per far questo si è usato un altro famoso design pattern, quello di ``Observable'' 
+e ``Observer'' in cui l'``Observer'' è questa stessa classe e l'``Observable''
+è la classe IncomingMessage del pacchetto \textbf{messaging}.\\
+Alla ricezione di ogni messaggio viene invocato il metodo \emph{decodeMessage()}
+che decodifica il messaggio ricevuto e crea un'istanza di DecodedMessage per 
+accogliere le informazioni appena ricevute e facilitarne l'accesso. Se il messaggio
+contiene informazioni sulla distanza del primo oggetto nella direzione del robot
+allora tale distanza viene salvata nell'istanza in modo che successivamente si
+possa usare per valutare in modo più preciso la situazione.\\
+Il metodo principale della classe è \emph{think()} ed è invocato ogni volta che
+dal package opencv, e in particolare dalla classe TargetSearch, giunge un aggiornamento
+sull'obbiettivo, la sua eventuale presenza in scena e la sua posizione. \emph{think()}
+viene effettivamente eseguito solo se sull'interfaccia utente è stato premuto "Start"
+ e per prima cosa stabilisce in che fase l'iterazione precedente ha portato il sistema. \\
+ Le possibilità sono:
+	\begin{itemize}
+	\item ``Cheer Phase'': indica che l'obbiettivo è stato trovato e il robot sta
+	girando su se stesso per segnalare la fine della ricerca.
+	\item ``Avoiding Phase'': indica che sulla traiettoria del robot si è presentato un ostacolo e lo sta aggirando. Si compone di tre sottofasi:
+	\begin{itemize}
+		\item Fase 1: Scegliere in modo casuale una direzione tra destra e sinistra e ruota di circa 90° in quella direzione. 
+		\item Fase 2: Si muove in avanti per un tempo prestabilito.
+		\item Fase 3: Ruota di 90° nella direzione opposta a quella scelta nella fase 1.
+	\end{itemize}
+	\item ``Search Phase'': indica che l'obbiettivo non è stato ancora trovato e il robot si sta muovendo per trovarlo.
+	\end{itemize}
+
+Se si trova nella ``Cheer Phase'' ignora ogni comunicazione proveniente da 
+Arduino, finisce la rotazione di segnalazione e invoca il metodo \emph{reset()} di 
+RobotActivity per preparare il sistema all'inserimento di un nuovo obbiettivo da 
+parte dell'utente.\\
+Se si trova nella ``Avoiding Phase'' esegue in successione le tre fasi. 
+Si può interrompere solo se durante le manovre di aggiramento dell'ostacolo
+l'obbiettivo compare nella scena.\\
+Se si trova nella ``Search Phase'' controlla se l'obbiettivo è presente in scena e 
+si trova a meno di 30 centimetri, in caso di risposta affermativa ferma il robot,
+interrompe l'esecuzione di \emph{think()} e attiva la ``Cheer Phase''. 
+Se l'obbiettivo non è in vista ma c'è un oggetto a meno di 30 centimetri ferma il robot
+e attiva la ``Avoiding Phase''.\\
+Se l'obbiettivo non è visibile rimane in ``Search Phase'' e si muove in avanti.\\
+Se l'obbiettivo è visibile ma si trova a più di 30 centimetri effettua le correzioni di rotta
+necessarie per portarlo in direzione di marcia.\\
+Se l'obbiettivo è precisamente di fronte al robot si muoverà in quella direzione.\\ 
+La rotazione necessaria per portare l'obbiettivo esattamente di fronte al robot 
+implica movimenti lenti e precisi che è difficile ottenere con i motori DC di cui è
+fornito il robot. Lo scenario tipico è vedere i motori sforzarsi di muovere il robot
+con un certo quantitativo di energia, aumentare quell'energia di un'unità e vedere 
+il robot iniziare a ruotare velocemente. Purtroppo l'energia richiesta per 
+mettere in rotazione il robot cambiava in funzione di troppe variabili: 
+la direzione di rotazione, l'uso di entrambi i cingoli o solamente uno, 
+la presenza di piccoli ostacoli sotto il robot. Per ovviare a questo problema che impediva 
+una corretta movimentazione del robot quando erano necessari movimenti precisi 
+si è usato una soluzione adattiva che permette al robot di trovare sempre la 
+minima energia necessaria per muoversi. Per far questo il robot prende come riferimento 
+la posizione dell'obbiettivo e tenta di ruotare, se all'iterazione successiva 
+non nota uno spostamento relativamente all'obbiettivo allora aumenta 
+l'energia inviata ad i motori. Appena si muove l'energia cessa di essere 
+aumentata e il robot ruota in modo fluido e controllato.
+\subsection {Il package \textit{opencv}}
+
+
+ 
+
+
+
+\section {Arduino} 
