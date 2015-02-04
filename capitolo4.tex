@@ -21,8 +21,8 @@ Contiene tre classi: RobotActivity, RobotLogic e UpdateDirections.
 \subsubsection{La classe \emph{RobotActivity}}
 Come suggerisce il nome è l'Activity vera e propria, cioè quella classe che il 
 sistema operativo istanzia all'avvio dell'app. Essa stessa istanzia e prepara tutti gli 
-altri oggetti per l'esecuzione. Implementa due interfacce: \textit{View.OnTouchListener} 
-e \textit{CvCameraViewListener}. 
+altri oggetti per l'esecuzione. Implementa due interfacce: \View.OnTouchListener 
+e CvCameraViewListener. 
 La prima permette di gestire gli input da touch screen senza ricorrere ad una classe esterna,
 la seconda è un'interfaccia presente nella libreria OpenCV e permette di ``intercettare''
 i frame proveniente dalla camera prima che vengano renderizzati a schermo tramite 
@@ -34,7 +34,16 @@ callback \textit{BaseLoaderCallback} e ottiene il riferimento all'istanza dell'A
 tramite l'ADKToolkit. E' buona norma interrompere le connessioni e liberare il canale usato 
 nel momento in cui un'app viene chiusa. Per questo nel metodo \emph{onDestroy()} 
 viene chiuso il canale usato per comunicare con Arduino tramite il metodo \emph{close()}
-fornito dall'ADKToolkit.
+fornito dall'ADKToolkit.\\
+In aggiunta alle normali funzioni di un'Activity RobotActivity integra un 
+listner per gli eventi touch verificatesi all'interno della porzione di 
+interfaccia utente che mostra il video proveniente dalla camera. Al verificarsi di un
+tale evento viene invocato il metodo \emph{onTouch()} ereditato da View.OnTouchListener 
+che esegue la media dei colori presenti in una regione di 8x8px intorno alle coordinate
+in cui è avvenuto il tocco da parte dell'utente. Fornisce il colore così calcolato a 
+alla classe TargetSearch del package \textbf{opencv} tramite il metodo pubblico 
+di quest'ultima \emph{setTargetHsvColor()}. Questo sarà il colore che il robot cercherà
+nella scena, il suo obbiettivo.
 
  \subsubsection{La classe \emph{UpdateDirections}}
  Questa classe è un ``singleton''\footnote{E' un design pattern descritto dalla 
@@ -85,9 +94,9 @@ viene effettivamente eseguito solo se sull'interfaccia utente è stato premuto "
 	girando su se stesso per segnalare la fine della ricerca.
 	\item ``Avoiding Phase'': indica che sulla traiettoria del robot si è presentato un ostacolo e lo sta aggirando. Si compone di tre sottofasi:
 	\begin{itemize}
-		\item Fase 1: Scegliere in modo casuale una direzione tra destra e sinistra e ruota di circa 90° in quella direzione. 
-		\item Fase 2: Si muove in avanti per un tempo prestabilito.
-		\item Fase 3: Ruota di 90° nella direzione opposta a quella scelta nella fase 1.
+		\item Fase 1: scegliere in modo casuale una direzione tra destra e sinistra e ruota di circa 90° in quella direzione. 
+		\item Fase 2: si muove in avanti per un tempo prestabilito.
+		\item Fase 3: ruota di 90° nella direzione opposta a quella scelta nella fase 1.
 	\end{itemize}
 	\item ``Search Phase'': indica che l'obbiettivo non è stato ancora trovato e il robot si sta muovendo per trovarlo.
 	\end{itemize}
@@ -124,6 +133,59 @@ non nota uno spostamento relativamente all'obbiettivo allora aumenta
 l'energia inviata ad i motori. Appena si muove l'energia cessa di essere 
 aumentata e il robot ruota in modo fluido e controllato.
 \subsection {Il package \textit{opencv}}
+Il package \textbf{opencv} è costituito di due sole classi. Si occupa di analizzare 
+i frame proveniente dalla camera alla ricerca dell'obbiettivo, comunica poi la posizione 
+dell'obbiettivo o l'assenza dello stesso alla classe RobotLogic del package 
+\textbf{logic}.
+\subsubsection{La classe \emph{ColorBlobDetector}}
+\emph{ColorBlobDetector} è la classe che effettivamente cerca l'obbiettivo nei
+frame proveniente dalla camera. L'obbiettivo gli viene fornito da RobotActivity 
+tramite \emph{setTargetHsvColor()} nel momento in cui l'utente lo indica 
+sull'interfaccia utente. I colori in OpenCV vengono rappresentati con un tipo di dato interno
+detto Scalar che può essere assimilato ad un array. Il metodo che esegue 
+l'operazione di ricerca è \emph{process()}. Per prima cosa converte lo schema di 
+colori del frame sotto analisi da RGBa\footnote{Ogni colore è rappresentato da 
+quattro valori compresi tra 0 e 255 per le immagini CV_8U, cioè le immagini dove 
+i colori sono memorizzati in un byte. I quattro canali sono R (red), G (green), 
+B(blue) e ``a'' (alpha) }. a HSV\footnote{Ogni colore è rappresentato da quattro 
+valori compresi tra 0 e 255 per le immagini CV_8U, cioè le immagini dove 
+i colori sono memorizzati in un byte. I quattro canali sono H (hue), S(saturation), 
+V (value) e  ``a'' (alpha)} e filtra l'immagine in modo che rimangano solo 
+i pixel che hanno un colore che si trova entro un certo intorno del colore cercato.
+Usa poi la funzione fornita da OpenCV \emph{findContours()} che cerca i contorni delle
+zone con il colore di nostro interesse e li restituisce come una un ArrayList di MatOfPoint;
+MatOfPoint è un tipo di dato di OpenCV che è usato per memorizzare una quantità variabile
+di punti che sono in relazione tra di loro, in questo caso dei punti che formano un contorno.
+In seguito cerca il contorno che ha area maggiore e scarta tutti quelli che sono più piccoli 
+del limite impostato ad un un'ordine di grandezza in meno. I contorni rimasti 
+saranno quelli analizzati da TargetSearch.
+
+
+\subsubsection{La classe \emph{TargetSearch}}
+Questa classe per prima cosa invoca \emph{process()} di ColorBlobDetector passandogli
+il frame da analizzare e raccoglie i risultati tramite \emph{getContours()} che restituisce 
+i contorni individuati da \emph{process()}.\\
+Scorre poi uno ad uno i contorni così ricevuti e trova per ognuno un ``Bounding Rectangle'', 
+cioè il rettangolo di area minima che contiene per interno il contorno corrente, 
+scartando tutti i rettangoli minori di un certo valore e mantenendo un riferimento 
+a quello di area maggiore trovato fino a quel momento. I rettangoli saranno tutti colorati di blue
+ tranne quello di area maggiore che sarà colorato di rosso. Sarà proprio questo 
+ rettangolo il nostro obbiettivo.\\
+ Fornisce un feedback all'utente sul colore scelto e la gamma di colori simili 
+ che sono stati cercati.\\
+ Infine calcola la posizione dell'obbiettivo e la comunica a RobotLogic e comanda 
+ a UpdateDirection del pacchetto \textbf{logic} di mostrare le informazioni corrispondenti.
+ Le posizioni sono sempre riferite all'asse x in quanto il robot non 
+ ha capacità di movimento sull'asse y e possono essere:
+ \begin{itemize}
+	\item TARGET_POSITION_LEFT: il centro dell'obbiettivo si trova a sinistra del centro del frame. 
+	\item TARGET_POSITION_RIGHT: il centro dell'obbiettivo si trova a destra del centro del frame. 
+	\item TARGET_POSITION_FRONT: il centro dell'obbiettivo e il centro del frame coincidono. 
+	\item TARGET_POSITION_NONE: l'obbiettivo non è visibile.
+\end{itemize}
+
+\subsection{Il package \textit{messaging}}
+
 
 
  
