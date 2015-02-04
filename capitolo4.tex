@@ -21,7 +21,7 @@ Contiene tre classi: RobotActivity, RobotLogic e UpdateDirections.
 \subsubsection{La classe \emph{RobotActivity}}
 Come suggerisce il nome è l'Activity vera e propria, cioè quella classe che il 
 sistema operativo istanzia all'avvio dell'app. Essa stessa istanzia e prepara tutti gli 
-altri oggetti per l'esecuzione. Implementa due interfacce: \View.OnTouchListener 
+altri oggetti per l'esecuzione. Implementa due interfacce: View.OnTouchListener 
 e CvCameraViewListener. 
 La prima permette di gestire gli input da touch screen senza ricorrere ad una classe esterna,
 la seconda è un'interfaccia presente nella libreria OpenCV e permette di ``intercettare''
@@ -145,12 +145,12 @@ sull'interfaccia utente. I colori in OpenCV vengono rappresentati con un tipo di
 detto Scalar che può essere assimilato ad un array. Il metodo che esegue 
 l'operazione di ricerca è \emph{process()}. Per prima cosa converte lo schema di 
 colori del frame sotto analisi da RGBa\footnote{Ogni colore è rappresentato da 
-quattro valori compresi tra 0 e 255 per le immagini CV_8U, cioè le immagini dove 
+quattro valori compresi tra 0 e 255 per le immagini CV\_8U, cioè le immagini dove 
 i colori sono memorizzati in un byte. I quattro canali sono R (red), G (green), 
-B(blue) e ``a'' (alpha) }. a HSV\footnote{Ogni colore è rappresentato da quattro 
-valori compresi tra 0 e 255 per le immagini CV_8U, cioè le immagini dove 
-i colori sono memorizzati in un byte. I quattro canali sono H (hue), S(saturation), 
-V (value) e  ``a'' (alpha)} e filtra l'immagine in modo che rimangano solo 
+B (blue) e a (alpha) }. a HSV\footnote{Ogni colore è rappresentato da quattro 
+valori compresi tra 0 e 255 per le immagini CV\_8U, cioè le immagini dove 
+i colori sono memorizzati in un byte. I quattro canali sono H (hue), S (saturation), 
+V (value) e  a (alpha)} e filtra l'immagine in modo che rimangano solo 
 i pixel che hanno un colore che si trova entro un certo intorno del colore cercato.
 Usa poi la funzione fornita da OpenCV \emph{findContours()} che cerca i contorni delle
 zone con il colore di nostro interesse e li restituisce come una un ArrayList di MatOfPoint;
@@ -178,18 +178,136 @@ a quello di area maggiore trovato fino a quel momento. I rettangoli saranno tutt
  Le posizioni sono sempre riferite all'asse x in quanto il robot non 
  ha capacità di movimento sull'asse y e possono essere:
  \begin{itemize}
-	\item TARGET_POSITION_LEFT: il centro dell'obbiettivo si trova a sinistra del centro del frame. 
-	\item TARGET_POSITION_RIGHT: il centro dell'obbiettivo si trova a destra del centro del frame. 
-	\item TARGET_POSITION_FRONT: il centro dell'obbiettivo e il centro del frame coincidono. 
-	\item TARGET_POSITION_NONE: l'obbiettivo non è visibile.
+	\item TARGET\_POSITION\_LEFT: il centro dell'obbiettivo si trova a sinistra del centro del frame. 
+	\item TARGET\_POSITION\_RIGHT: il centro dell'obbiettivo si trova a destra del centro del frame. 
+	\item TARGET\_POSITION\_FRONT: il centro dell'obbiettivo e il centro del frame coincidono. 
+	\item TARGET\_POSITION\_NONE: l'obbiettivo non è visibile.
 \end{itemize}
 
 \subsection{Il package \textit{messaging}}
+Questo package è un modulo completamente a se stante, è così possibile cambiare il
+ protocollo di comunicazione senza alterare la logica del robot. Le stringhe sono 
+ tutte codificate e decodificate all'interno di questo package, non c'è nulla di 
+ ``hard coded''\footnote{Una pratica considerata da evitare che prevede stringhe di 
+ testo scritte direttamente nel codice}.
+ \\ Nel nostro caso i messaggi sono formati da tre interi da un byte, così che il 
+ range possibile è 0-255, separati da virgole.
+ I messaggi diretti da Arduino ad Android hanno questa forma:
+ \begin{center}
+ \textbf{MessageType,Message,Data}
+ \end{center}
+ dove MessageType può assumere due valori: INFO, indica che il messaggio trasporta un
+ dato informativo, o STATE, indica che il messaggio comunica lo stato in cui si trova Arduino.
+ \\Se il MessageType è INFO allora il Message può essere di due tipi: 
+ \begin{itemize}\item DISTANCE: sulla porzione Data del messaggio sarà presente 
+ la distanza del primo oggetto di fronte al robot.
+ \item TERMINATE: indica l'intenzione di Arduino di chiudere l'app Android.
+ \end{itemize}
+ Se il MessageType è STATE allora il Message può essere di quattro tipi: 
+ \begin{itemize}
+ 	\item IDLE: il robot non sta eseguendo alcuna azione.
+ 	\item SEARCHING: il robot si sta muovendo in cerca dell'obbiettivo.
+ 	\item HUNTING: il robot si sta muovendo verso l'obbiettivo.
+ 	\item EMERGENCY: il robot è in emergenza, non eseguirà nessun comando fino al 
+ 	termine della situazione di emergenza. 
+ \end{itemize}
+  I messaggi diretti da Android ad Arduino hanno invece questa forma:
+ \begin{center}
+ \textbf{Command,Parameter1,Parameter2}
+ \end{center}
+ Command identifica l'azione da eseguire, Parameter1 e Parameter2 sono due parametri opzionali
+ che modificano il comportamento standard dell'azione richiesta.
+ \subsubsection{La classe \emph{IncomingMessage}}
+ Questa classe estende la classe Observable e insieme alla classe RobotLogic del 
+ package \textbf{logic} implementa il design pattern ``Observer-Observable''. 
+ \\ Contiene il messaggio ricevuto da Arduino e informa gli Observer della presenza 
+ di un nuovo messaggio tramite \emph{triggerObservers()}.
 
+ \subsubsection{La classe \emph{DecodedMessage}}
+ Contiene il messaggio decodificato e diviso in ogni usa componente.
+ \\Espone diversi metodi che consentono di fare un controllo veloce sul contenuto del messaggio.
+ Un esempio della versatilità di questi metodi pubblici è:  
+ \lstset{language=Java}
 
+\begin{lstlisting}[caption=Metodo \emph{decodeMessage()} di RobotLogic del 
+pacchetto \textbf{logic}]
+private void decodeMessage() {
+    DecodedMessage incomingMessage = MessageEncoderDecoder.decodeIncomingMessage(mCommunicator.getIncoming());
+    if (!incomingMessage.hasError()) {
+        if (incomingMessage.isInfoMessage() && incomingMessage.hasDistance()) {
+            mDistance = incomingMessage.getData();
+        }
+        if (incomingMessage.isTerminateCommand()) {
+            mRobotActivity.finish();
+        }
+    }
+}
+\end{lstlisting}
 
- 
+\subsubsection{La classe \emph{MessageEncoderDecoder}}
+In questa classe sono definite tutte le costanti necessarie per la codifica delle
+stringhe da inviare Arduino e per la decodifica di quelle ricevute da Arduino. 
+Espone solamente metodi statici, non necessita quindi di essere istanziata.\\
+Per la decodifica si usa il metodo \emph{decodeIncomingMessage()} che prende 
+come parametro l'IncomingMessage appena ricevuto, lo divide nelle sue tre parti 
+fondamentali e a partire da queste crea un nuovo oggetto di tipo DecodedMessage.\\
+Dispone poi di numerosi metodi per la codifica di messaggi da inviare ad Arduino:
+\begin{itemize}
+    \item \emph{moveForward(int motorLeft, int motorRight)}: comanda di 
+    muoversi in avanti e applicare ai motori le potenze indicate da motorLeft e motorRight
+    \item \emph{moveForward()}: comanda di muoversi in avanti e applicare ai motori 
+    potenza pari a DEFAULT\_VELOCITY ad entrambi i motori. 
+    \item \emph{moveBackward(int motorLeft, int motorRight)}: comanda di 
+    muoversi in indietro e applicare ai motori le potenze indicate da motorLeft e motorRight
+    \item \emph{moveBackward()}: comanda di muoversi in indietro e applicare ai motori 
+    potenza pari a DEFAULT\_VELOCITY ad entrambi i motori. 
+    \item \emph{stop()}: comanda di fermarsi.
+    \item \emph{turnLeft(int velocity, int mode)}: comanda di ruotare verso 
+    sinistra e applicare ai motori potenza pari a \emph{velocity}.
+    \item \emph{turnLeft(int mode)}: comanda di ruotare verso 
+    sinistra e applicare ai motori potenza pari a DEFAULT\_VELOCITY.   
+    \item \emph{turnRight(int velocity, int mode)}: comanda di ruotare verso 
+    destra e applicare ai motori potenza pari a \emph{velocity}.
+    \item \emph{turnRight(int mode)}: comanda di ruotare verso 
+    destra e applicare ai motori potenza pari a DEFAULT\_VELOCITY.  
+    \item \emph{search()}: comanda di cercare l'obbiettivo.
+\end{itemize}
+Nei metodi \emph{turnLeft} e \emph{turnRight}, \emph{mode} può assumere il valore 
+TURN\_ON\_SPOT o TURN\_NORMALLY che fanno girare il robot rispettivamente utilizzando 
+entrambi i cingoli o solo il cingolo opposto alla direzione di rotazione.\\
+Grazie a questi metodi pubblici la parte di logica dell'app invia messaggi ad Arduino
+senza avere la minima conoscenza della stringa che effettivamente sarà inviata.\\
+Tutto quello che si limita a fare per comandare, per esempio, ad Arduino di girare 
+sul posto verso destro e con una velocità di 200 è:
+\begin{lstlisting}[caption=Esempio di codifica e invio di un comando ad Arduino]
+Communicator.setOutgoing(MessageEncoderDecoder.turnRight(200, MessageEncoderDecoder.TURN_ON_SPOT));
+\end{lstlisting}
 
-
+\subsubsection{La classe \emph{Communicator}}
+Questa classe è un'AsyncTask\footnote{Classe fornita dall'SDK di Android che di fatto 
+crea un thread e fornisce metodi per inizializzare l'esecuzione, elaborare il 
+risultato e eseguire azioni specifiche durante l'avanzamento del lavoro in background.}.
+Nella fase di creazione crea un oggetto di tipo IncomingMessage e ne mantiene il riferimento. 
+Qui verrà inserito di volta in volta l'ultimo messaggio ricevuto da Arduino.\\
+Il messaggio da inviare è memorizzato invece nel campo privato mOutgoing che viene di volta 
+in volta impostato da RobotLogic tramite il ``setter''\footnote{Metodo che fornisce 
+l'accesso in scrittura ad un campo privato di un oggetto} \emph{setOutgoing()}.\\
+Il metodo \emph{doInBackground} è un metodo ereditato da AsyncTask ed è dove vengono 
+eseguite le operazioni intensive, contiene un ciclo \emph{while} che rimane in esecuzione 
+fintanto che il flag mKeepAlive è impostato su true.\\
+Ad ogni iterazione del ciclo invia un messaggio ad Arduino, se non è presente un nuovo 
+messaggio reitera quello precedente.\\
+Si mette poi in attesa di ricevere un messaggio da Arduino, se quest'ultimo è 
+diverso dal precedente messaggio allora lo scrive in IncomingMessage dove verrà
+letto e analizzato da RobotLogic, altrimenti lo ignora.\\
+E' bene notare che la \emph{read()} fornita dall'ADK è bloccante, quindi finché Arduino
+non invia un messaggio, e questo è disponibile sul buffer di lettura, l'esecuzione di 
+\emph{doInBackground()} è interrotta. Questo comportamento potrebbe portare 
+all'indesiderata situazione in cui un messaggio in attesa di essere inviato ad Arduino
+venga sovrascritto dal successivo messaggio elaborato da RobotLogic. Per evitare questo scenario
+Arduino invia ad ogni iterazione del proprio ciclo \emph{loop()} almeno un messaggio ad
+Android, che, in assenza di situazioni particolari, sarà la lettura proveniente dal 
+sensore di distanza; in questo modo oltre ad evitare il blocco di \emph{doInBackground} 
+si invia ad Arduino un'informazione comunque utile per la navigazione.
 
 \section {Arduino} 
