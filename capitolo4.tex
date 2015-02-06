@@ -2,6 +2,16 @@
 \chapter{Implementazione}
 \fancyhead[R]{\bfseries Implementazione} 	
 \fancyfoot[C]{\thepage }
+Il successivo diagramma descrive in generale il processo che preso un frame e un messaggio
+di Arduino restituisce una risposta generata dalla logica dell'app.
+\begin{figure}[H] \center
+\includegraphics[scale=0.2]{immagini/package_diagram.png}
+\caption{Ciclo delle informazioni e dei comandi del sistema} 
+\end{figure}
+
+
+
+
 È definito ``agente'' una qualunque entità in grado di percepire l'ambiente
 circostante attraverso dei sensori e di eseguire delle azioni attraverso degli
 attuatori. Nel campo dell'intelligenza artificiale è definito intelligente quel-
@@ -13,147 +23,18 @@ L'app per Android è stata sviluppata avendo come priorità la modularità. E'
 infatti molto semplice cambiare totalmente il comportamento dell'agente o la 
 codifica dei messaggi sostituendo o modificando una singola classe senza 
 coinvolgere il resto del codice.\\
-La modularizzazione a grana più grossa è a livello di package\footnote{Un contenitore 
-che racchiude classi che svolgono compitini affini}: ci sono tre package,
+La modularizzazione a grana più grossa è a livello di pacchetto\footnote{Un contenitore 
+che racchiude classi che svolgono compitini affini}: ci sono tre pacchetti,
 ognuno con un compito preciso, e sono \textbf{logic}, \textbf{messaging} e \textbf{opencv}.
 \begin{figure}[H] \center
 \includegraphics[scale=0.2]{immagini/package_diagram.png}
-\caption{Schema di interconnessione dei package} 
+\caption{Schema di interconnessione dei pacchetti} 
 \end{figure}
-\subsection {Il package \textit{logic}}
-Si occupa di reperire le informazioni dal mondo reale e analizzarle al fine di
-eseguire l'azione più adatta.
-Contiene tre classi: RobotActivity, RobotLogic e UpdateDirections.
-\subsubsection{La classe \emph{RobotActivity}}
-Come suggerisce il nome è l'Activity vera e propria, cioè quella classe che il 
-sistema operativo istanzia all'avvio dell'app. Essa stessa istanzia e prepara tutti gli 
-altri oggetti per l'esecuzione. Implementa due interfacce: View.OnTouchListener 
-e CvCameraViewListener. 
-La prima permette di gestire gli input da touch screen senza ricorrere ad una classe esterna,
-la seconda è un'interfaccia presente nella libreria OpenCV e permette di ``intercettare''
-i frame proveniente dalla camera prima che vengano renderizzati a schermo tramite 
-l'override\footnote{Tecnica che permette di ridefinire il comportamento di un metodo 
-ereditato} del metodo \textit{OnCameraFrame()}. Ogni frame verrà elaborato e solo alla
-fine visualizzato a schermo.
-All'avvio si occupa di inizializzare OpenCV tramite la 
-callback \textit{BaseLoaderCallback} e ottiene il riferimento all'istanza dell'ADK
-tramite l'ADKToolkit, inizializza il Communicator e passa il riferimento di quest'ultimo
- a TargetSearch durante l'esecuzione.\\E' buona norma interrompere le connessioni e liberare il canale usato 
-nel momento in cui un'app viene chiusa. Per questo nel metodo \emph{onDestroy()} 
-viene chiuso il canale usato per comunicare con Arduino tramite il metodo \emph{close()}
-fornito dall'ADKToolkit e viene fermato lo scheduler che esegue il Communicator\\
-In aggiunta alle normali funzioni di un'Activity RobotActivity integra un 
-listner per gli eventi touch verificatesi all'interno della porzione di 
-interfaccia utente che mostra il video proveniente dalla camera. Al verificarsi di un
-tale evento viene invocato il metodo \emph{onTouch()} ereditato da View.OnTouchListener 
-che esegue la media dei colori presenti in una regione di 8x8px intorno alle coordinate
-in cui è avvenuto il tocco da parte dell'utente. Fornisce il colore così calcolato a 
-alla classe TargetSearch del package \textbf{opencv} tramite il metodo pubblico 
-di quest'ultima \emph{setTargetHsvColor()}. Questo sarà il colore che l'agente cercherà
-nella scena, il suo obbiettivo.
 
- \subsubsection{La classe \emph{UpdateDirections}}
- Questa classe è un ``singleton''\footnote{E' un design pattern descritto dalla 
- cosiddetta ``Gang of four'' nel libro ``Design Patterns''. 
- Permette la creazione di una sola istanza della classe e ne regola l'accesso. } 
- e si occupa di mostrare all'utente tramite  immagini e testi quello che l'agente
- sta facendo o quale sarà la sua prossima  mossa. Dovendo agire 
- sull'UI\footnote{User Interface, interfaccia utente} deve essere eseguita sul thread
- che si occupa dell'UI, per questo implementa l'interfaccia \emph{Runnable} e 
- ogni sua esecuzione è lanciata  tramite \emph{runOnUiThread()}. 
- Le informazioni visualizzabili sono limitate e ben distinte,
- ad ognuna corrisponde un metodo da invocare per visualizzare quella data informazione
- a schermo. I metodi disponibili sono: 
- \begin{itemize}
- \item \emph{left()}: indica che l'obiettivo è visibile è stato individuato e si trova alla sinistra dell'agente.
- \item \emph{right()}: indica che l'obiettivo è visibile è stato individuato e si trova alla destra dell'agente.
- \item \emph{aimed()}: indica che l'obiettivo è visibile è stato individuato e si trova esattamente di fronte all'agente che si muoverà in quella direzione.
- \item \emph{search()}: indica che l'obiettivo non è visibile, l'agente si muoverà secondo l'algoritmo di ricerca.
- \item \emph{found()}: indica che l'obiettivo è visibile e l'agente si trova a meno di 30 centrimetri.
- \item \emph{avoidingLeft()}: indica che è presente un ostacolo sul percorso dell'agente a meno di 30 centimetri. L'agente lo aggirerà verso sinistra. 
- \item \emph{avoidingRight()}: indica che è presente un ostacolo sul percorso dell'agente a meno di 30 centimetri. L'agente lo aggirerà verso destra.
- \item \emph{chooseColor()}: indica che l'agente è in attesa che venga impostato il colore da cercare. 
- \end{itemize}
- La classe espone anche altri metodi che mostrano (\emph{show()}) o nascondono 
- (\emph{hide()}) la porzione di interfaccia che visualizza le indicazioni, oppure bloccano (\emph{lock()})
- e sbloccano (\emph{unlock()}) la possibilità di cambiare le indicazioni visualizzate.
-
-\subsubsection{La classe astratta \emph{BaseAi} e l'interfaccia \emph{IBaseAi}}
-Usando l'ereditarietà forniscono la base di partenza per la classe RobotLogic.\\
-L'interfaccia ha due metodi: \emph{targetPosition()} e \emph{think()}.
-BaseAi sfrutta l'interfaccia IBaseAi e implementa il metodo \emph{targetPosition()}. 
-Tramite questo metodo TargetSearch fornisce all'AI la larghezza del frame, la posizione 
-dell'obbiettivo e il buonding rect dell'obbiettivo; a partire da questi verranno 
-calcolati altri parametri che saranno utilizzati in \emph{think()}.\\
-Con questa organizzazione si fa si che i comportamenti e i dati indispensabili per una classe di 
-AI siano definiti in BaseAI e quindi ogni nuova classe nata per sostituire o migliorare
- la logica attuale dovrà estendere BaseAi e implementare \emph{think()} 
-
-\subsubsection{La classe \emph{RobotLogic}}
-La classe \emph{RobotLogic} è il vero ``cervello'' di tutta l'app.\\
-Viene chiamata in causa ogni volta che arriva un nuovo messaggio da Arduino. 
-Per far questo si è usato un altro famoso design pattern, quello di ``Observable'' 
-e ``Observer'' in cui l'``Observer'' è questa stessa classe e l'``Observable''
-è la classe IncomingMessage del pacchetto \textbf{messaging}.\\
-Alla ricezione di ogni messaggio viene invocato il metodo \emph{getIncoming()} 
-della classe IncomingMessage che fornisce un'istanza di ArduinoMessage che contiene 
-la decodifica del messaggio appena ricevuto. Se il messaggio
-contiene informazioni sulla distanza del primo oggetto nella direzione dell'agente
-allora tale distanza viene salvata nell'istanza in modo che successivamente si
-possa usare per valutare in modo più preciso la situazione.\\
-Il metodo principale della classe è \emph{think()} ed è invocato ogni volta che
-dal package opencv, e in particolare dalla classe TargetSearch, giunge un aggiornamento
-sull'obbiettivo, la sua eventuale presenza in scena e la sua posizione. \emph{think()}
-viene effettivamente eseguito solo se sull'interfaccia utente è stato premuto "Start"
- e per prima cosa stabilisce in che fase l'iterazione precedente ha portato il sistema. \\
- Le possibilità sono:
-	\begin{itemize}
-	\item ``Cheer Phase'': indica che l'obbiettivo è stato trovato e l'agente sta
-	girando su se stesso per segnalare la fine della ricerca.
-	\item ``Avoiding Phase'': indica che sulla traiettoria dell'agente si è presentato un ostacolo e lo sta aggirando. Si compone di tre sottofasi:
-	\begin{itemize}
-		\item Fase 1: scegliere in modo casuale una direzione tra destra e sinistra e ruota di circa 90° in quella direzione. 
-		\item Fase 2: si muove in avanti per un tempo prestabilito.
-		\item Fase 3: ruota di 90° nella direzione opposta a quella scelta nella fase 1.
-	\end{itemize}
-	\item ``Search Phase'': indica che l'obbiettivo non è stato ancora trovato e l'agente si sta muovendo per trovarlo.
-	\end{itemize}
-
-Se si trova nella ``Cheer Phase'' ignora ogni comunicazione proveniente da 
-Arduino, finisce la rotazione di segnalazione e invoca il metodo \emph{reset()} di 
-RobotActivity per preparare il sistema all'inserimento di un nuovo obbiettivo da 
-parte dell'utente.\\
-Se si trova nella ``Avoiding Phase'' esegue in successione le tre fasi. 
-Si può interrompere solo se durante le manovre di aggiramento dell'ostacolo
-l'obbiettivo compare nella scena.\\
-Se si trova nella ``Search Phase'' controlla se l'obbiettivo è presente in scena e 
-si trova a meno di 30 centimetri, in caso di risposta affermativa ferma l'agente,
-interrompe l'esecuzione di \emph{think()} e attiva la ``Cheer Phase''. 
-Se l'obbiettivo non è in vista ma c'è un oggetto a meno di 30 centimetri ferma l'agente
-e attiva la ``Avoiding Phase''.\\
-Se l'obbiettivo non è visibile rimane in ``Search Phase'' e si muove in avanti.\\
-Se l'obbiettivo è visibile ma si trova a più di 30 centimetri effettua le correzioni di rotta
-necessarie per portarlo in direzione di marcia.\\
-Se l'obbiettivo è precisamente di fronte all'agente si muoverà in quella direzione.\\ 
-La rotazione necessaria per portare l'obbiettivo esattamente di fronte all'agente 
-implica movimenti lenti e precisi che è difficile ottenere con i motori DC di cui è
-fornito l'agente. Lo scenario tipico è vedere i motori sforzarsi di muovere l'agente
-con un certo quantitativo di energia, aumentare quell'energia di un'unità e vedere 
-l'agente iniziare a ruotare velocemente. Purtroppo l'energia richiesta per 
-mettere in rotazione l'agente cambiava in funzione di troppe variabili: 
-la direzione di rotazione, l'uso di entrambi i cingoli o solamente uno, 
-la presenza di piccoli ostacoli sotto l'agente. Per ovviare a questo problema che impediva 
-una corretta movimentazione dell'agente quando erano necessari movimenti precisi 
-si è usato una soluzione adattiva che permette all'agente di trovare sempre la 
-minima energia necessaria per muoversi. Per far questo l'agente prende come riferimento 
-la posizione dell'obbiettivo e tenta di ruotare, se all'iterazione successiva 
-non nota uno spostamento relativamente all'obbiettivo allora aumenta 
-l'energia inviata ad i motori. Appena si muove l'energia cessa di essere 
-aumentata e l'agente ruota in modo fluido e controllato.
-\subsection {Il package \textit{opencv}}
-Il package \textbf{opencv} è costituito di due sole classi. Si occupa di analizzare 
+\subsection {Il pacchetto \textit{opencv}}
+Il pacchetto \textbf{opencv} è costituito di due sole classi. Si occupa di analizzare 
 i frame proveniente dalla camera alla ricerca dell'obbiettivo, comunica poi la posizione 
-dell'obbiettivo o l'assenza dello stesso alla classe RobotLogic del package 
+dell'obbiettivo o l'assenza dello stesso alla classe RobotLogic del pacchetto 
 \textbf{logic}.
 \subsubsection{La classe \emph{ColorBlobDetector}}
 \emph{ColorBlobDetector} è la classe che effettivamente cerca l'obbiettivo nei
@@ -206,10 +87,10 @@ a quello di area maggiore trovato fino a quel momento. I rettangoli saranno tutt
 Comanda ad UpdateDirection del pacchetto \textbf{logic} di mostrare le informazioni 
 corrispondenti alla posizione dell'obbiettivo.
 
-\subsection{Il package \textit{messaging}}
-Questo package è un modulo completamente a se stante, è così possibile cambiare il
+\subsection{Il pacchetto \textit{messaging}}
+Questo pacchetto è un modulo completamente a se stante, è così possibile cambiare il
  protocollo di comunicazione senza alterare la logica dell'agente. Le stringhe sono 
- tutte codificate e decodificate all'interno di questo package, non c'è nulla di 
+ tutte codificate e decodificate all'interno di questo pacchetto, non c'è nulla di 
  ``hard coded''\footnote{Una pratica considerata da evitare che prevede stringhe di 
  testo scritte direttamente nel codice}.
  \\ Nel nostro caso i messaggi sono formati da tre interi da un byte, così che il 
@@ -244,7 +125,7 @@ Questo package è un modulo completamente a se stante, è così possibile cambia
  cosiddetta ``Gang of four'' nel libro ``Design Patterns''. 
  Permette la creazione di una sola istanza della classe e ne regola l'accesso. } 
  estende la classe Observable e insieme alla classe RobotLogic del 
- package \textbf{logic} implementa il design pattern ``Observer-Observable''. 
+ pacchetto \textbf{logic} implementa il design pattern ``Observer-Observable''. 
  \\Accoglie il messaggio ricevuto da Arduino, crea un oggetto di tipo ArduinoMessage 
  per decodificare e custodire il messaggio ricevuto e informa gli Observer della presenza 
  di un nuovo messaggio tramite \emph{triggerObservers()}.\\
@@ -343,5 +224,216 @@ Arduino invia ad ogni iterazione del proprio ciclo \emph{loop()} almeno un messa
 Android, che, in assenza di situazioni particolari, sarà la lettura proveniente dal 
 sensore di distanza; in questo modo oltre ad evitare il blocco di \emph{run()} 
 si invia ad Arduino un'informazione comunque utile per la navigazione.
+\subsection {Il pacchetto \textit{logic}}
+Si occupa di reperire le informazioni dal mondo reale e analizzarle al fine di
+eseguire l'azione più adatta.
+Contiene tre classi: RobotActivity, RobotLogic e UpdateDirections.
+\subsubsection{La classe \emph{RobotActivity}}
+Come suggerisce il nome è l'Activity vera e propria, cioè quella classe che il 
+sistema operativo istanzia all'avvio dell'app. Essa stessa istanzia e prepara tutti gli 
+altri oggetti per l'esecuzione. Implementa due interfacce: View.OnTouchListener 
+e CvCameraViewListener. 
+La prima permette di gestire gli input da touch screen senza ricorrere ad una classe esterna,
+la seconda è un'interfaccia presente nella libreria OpenCV e permette di ``intercettare''
+i frame proveniente dalla camera prima che vengano renderizzati a schermo tramite 
+l'override\footnote{Tecnica che permette di ridefinire il comportamento di un metodo 
+ereditato} del metodo \textit{OnCameraFrame()}. Ogni frame verrà elaborato e solo alla
+fine visualizzato a schermo.
+All'avvio si occupa di inizializzare OpenCV tramite la 
+callback \textit{BaseLoaderCallback} e ottiene il riferimento all'istanza dell'ADK
+tramite l'ADKToolkit, inizializza il Communicator e passa il riferimento di quest'ultimo
+ a TargetSearch durante l'esecuzione.\\E' buona norma interrompere le connessioni e liberare il canale usato 
+nel momento in cui un'app viene chiusa. Per questo nel metodo \emph{onDestroy()} 
+viene chiuso il canale usato per comunicare con Arduino tramite il metodo \emph{close()}
+fornito dall'ADKToolkit e viene fermato lo scheduler che esegue il Communicator\\
+In aggiunta alle normali funzioni di un'Activity RobotActivity integra un 
+listner per gli eventi touch verificatesi all'interno della porzione di 
+interfaccia utente che mostra il video proveniente dalla camera. Al verificarsi di un
+tale evento viene invocato il metodo \emph{onTouch()} ereditato da View.OnTouchListener 
+che esegue la media dei colori presenti in una regione di 8x8px intorno alle coordinate
+in cui è avvenuto il tocco da parte dell'utente. Fornisce il colore così calcolato a 
+alla classe TargetSearch del pacchetto \textbf{opencv} tramite il metodo pubblico 
+di quest'ultima \emph{setTargetHsvColor()}. Questo sarà il colore che l'agente cercherà
+nella scena, il suo obbiettivo.
+
+\subsubsection{La classe \emph{UpdateDirections}}
+Questa classe è un ``singleton''\footnote{E' un design pattern descritto dalla 
+cosiddetta ``Gang of four'' nel libro ``Design Patterns''. 
+Permette la creazione di una sola istanza della classe e ne regola l'accesso. } 
+e si occupa di mostrare all'utente tramite  immagini e testi quello che l'agente
+sta facendo o quale sarà la sua prossima  mossa. Dovendo agire 
+sull'UI\footnote{User Interface, interfaccia utente} deve essere eseguita sul thread
+che si occupa dell'UI, per questo implementa l'interfaccia \emph{Runnable} e 
+ogni sua esecuzione è lanciata  tramite \emph{runOnUiThread()}. 
+Le informazioni visualizzabili sono limitate e ben distinte,
+ad ognuna corrisponde un metodo da invocare per visualizzare quella data informazione
+a schermo. I metodi disponibili sono: 
+\begin{itemize}
+	\item \emph{left()}: indica che l'obiettivo è visibile è stato individuato e si trova alla sinistra dell'agente.
+	\item \emph{right()}: indica che l'obiettivo è visibile è stato individuato e si trova alla destra dell'agente.
+	\item \emph{aimed()}: indica che l'obiettivo è visibile è stato individuato e si trova esattamente di fronte all'agente che si muoverà in quella direzione.
+	\item \emph{search()}: indica che l'obiettivo non è visibile, l'agente si muoverà secondo l'algoritmo di ricerca.
+	\item \emph{found()}: indica che l'obiettivo è visibile e l'agente si trova a meno di 30 centrimetri.
+	\item \emph{avoidingLeft()}: indica che è presente un ostacolo sul percorso dell'agente a meno di 30 centimetri. L'agente lo aggirerà verso sinistra. 
+	\item \emph{avoidingRight()}: indica che è presente un ostacolo sul percorso dell'agente a meno di 30 centimetri. L'agente lo aggirerà verso destra.
+	\item \emph{chooseColor()}: indica che l'agente è in attesa che venga impostato il colore da cercare. 
+\end{itemize}
+La classe espone anche altri metodi che mostrano (\emph{show()}) o nascondono 
+(\emph{hide()}) la porzione di interfaccia che visualizza le indicazioni, oppure bloccano (\emph{lock()})
+e sbloccano (\emph{unlock()}) la possibilità di cambiare le indicazioni visualizzate.
+
+\subsubsection{La classe astratta \emph{BaseAi} e l'interfaccia \emph{IBaseAi}}
+Usando l'ereditarietà forniscono la base di partenza per la classe RobotLogic.\\
+L'interfaccia ha due metodi: \emph{targetPosition()} e \emph{think()}.
+BaseAi sfrutta l'interfaccia IBaseAi e implementa il metodo \emph{targetPosition()}. 
+Tramite questo metodo TargetSearch fornisce all'AI la larghezza del frame, la posizione 
+dell'obbiettivo e il buonding rect dell'obbiettivo; a partire da questi verranno 
+calcolati altri parametri che saranno utilizzati in \emph{think()}.\\
+Con questa organizzazione si fa si che i comportamenti e i dati indispensabili per una classe di 
+AI siano definiti in BaseAI e quindi ogni nuova classe nata per sostituire o migliorare
+ la logica attuale dovrà estendere BaseAi e implementare \emph{think()} 
+
+\subsubsection{La classe \emph{RobotLogic}}
+La classe \emph{RobotLogic} è il vero ``cervello'' di tutta l'app.\\
+Viene chiamata in causa ogni volta che arriva un nuovo messaggio da Arduino. 
+Per far questo si è usato un altro famoso design pattern, quello di ``Observable'' 
+e ``Observer'' in cui l'``Observer'' è questa stessa classe e l'``Observable''
+è la classe IncomingMessage del pacchetto \textbf{messaging}.\\
+Alla ricezione di ogni messaggio viene invocato il metodo \emph{getIncoming()} 
+della classe IncomingMessage che fornisce un'istanza di ArduinoMessage che contiene 
+la decodifica del messaggio appena ricevuto. Se il messaggio
+contiene informazioni sulla distanza del primo oggetto nella direzione dell'agente
+allora tale distanza viene salvata nell'istanza in modo che successivamente si
+possa usare per valutare in modo più preciso la situazione.\\
+Il metodo principale della classe è \emph{think()} ed è invocato ogni volta che
+dal pacchetto opencv, e in particolare dalla classe TargetSearch, giunge un aggiornamento
+sull'obbiettivo, la sua eventuale presenza in scena e la sua posizione. \emph{think()}
+viene effettivamente eseguito solo se sull'interfaccia utente è stato premuto "Start"
+e per prima cosa stabilisce in che fase l'iterazione precedente ha portato il sistema. \\
+Le possibilità sono:
+	\begin{itemize}
+	\item ``Cheer Phase'': indica che l'obbiettivo è stato trovato e l'agente sta
+	girando su se stesso per segnalare la fine della ricerca.
+	\item ``Avoiding Phase'': indica che sulla traiettoria dell'agente si è presentato un ostacolo e lo sta aggirando. Si compone di tre sottofasi:
+	\begin{itemize}
+		\item Fase 1: scegliere in modo casuale una direzione tra destra e sinistra e ruota di circa 90° in quella direzione. 
+		\item Fase 2: si muove in avanti per un tempo prestabilito.
+		\item Fase 3: ruota di 90° nella direzione opposta a quella scelta nella fase 1.
+	\end{itemize}
+	\item ``Search Phase'': indica che l'obbiettivo non è stato ancora trovato e l'agente si sta muovendo per trovarlo.
+	\end{itemize}
+Se si trova nella ``Cheer Phase'' ignora ogni comunicazione proveniente da 
+Arduino, finisce la rotazione di segnalazione e invoca il metodo \emph{reset()} di 
+RobotActivity per preparare il sistema all'inserimento di un nuovo obbiettivo da 
+parte dell'utente.\\
+Se si trova nella ``Avoiding Phase'' esegue in successione le tre fasi. 
+Si può interrompere solo se durante le manovre di aggiramento dell'ostacolo
+l'obbiettivo compare nella scena.\\
+Se si trova nella ``Search Phase'' controlla se l'obbiettivo è presente in scena e 
+si trova a meno di 30 centimetri, in caso di risposta affermativa ferma l'agente,
+interrompe l'esecuzione di \emph{think()} e attiva la ``Cheer Phase''. 
+Se l'obbiettivo non è in vista ma c'è un oggetto a meno di 30 centimetri ferma l'agente
+e attiva la ``Avoiding Phase''.\\
+Se l'obbiettivo non è visibile rimane in ``Search Phase'' e si muove in avanti.\\
+Se l'obbiettivo è visibile ma si trova a più di 30 centimetri effettua le correzioni di rotta
+necessarie per portarlo in direzione di marcia.\\
+Se l'obbiettivo è precisamente di fronte all'agente si muoverà in quella direzione.\\ 
+La rotazione necessaria per portare l'obbiettivo esattamente di fronte all'agente 
+implica movimenti lenti e precisi che è difficile ottenere con i motori DC di cui è
+fornito l'agente. Lo scenario tipico è vedere i motori sforzarsi di muovere l'agente
+con un certo quantitativo di energia, aumentare quell'energia di un'unità e vedere 
+l'agente iniziare a ruotare velocemente. Purtroppo l'energia richiesta per 
+mettere in rotazione l'agente cambiava in funzione di troppe variabili: 
+la direzione di rotazione, l'uso di entrambi i cingoli o solamente uno, 
+la presenza di piccoli ostacoli sotto l'agente. Per ovviare a questo problema che impediva 
+una corretta movimentazione dell'agente quando erano necessari movimenti precisi 
+si è usato una soluzione adattiva che permette all'agente di trovare sempre la 
+minima energia necessaria per muoversi. Per far questo l'agente prende come riferimento 
+la posizione dell'obbiettivo e tenta di ruotare, se all'iterazione successiva 
+non nota uno spostamento relativamente all'obbiettivo allora aumenta 
+l'energia inviata ad i motori. Appena si muove l'energia cessa di essere 
+aumentata e l'agente ruota in modo fluido e controllato.
 
 \section {Arduino} 
+La prima operazione effettuata su Arduino è l'inizializzazione dell'ADK fornendo 
+version, model e manufacturer identici a quelli indicati in usb\_accessory\_filter.xml 
+nell'app Android. In aggiunta viene indicato il campo url che fornisce, ad un utente
+che dovesse entrare in possesso del codice, il repository in cui è custodito il 
+codice dell'app Android associata.\\
+Nel \emph{setup()} avviene la configurazione dei pin utilizzati come input o output e si inizializza
+la connessione seriale a 115200 bps.\\
+In Arduino il metodo principale è \emph{loop()}, che come dice il nome stesso viene eseguito
+in ciclo infinito. Gli stati assegnati agli output sono persistenti attraverso 
+le varie iterazioni del ciclo.
+La prima operazione fatta è il controllo dei sensori di riflessività. Se dovessere 
+essere in stato di ``warning'' si interrompe l'esecuzione del \emph{loop()} 
+forzandolo a passare all'iterazione successiva e si fa un altro controllo, se i 
+sensori sono ancora in ``warning'' allora si innesca la modalità ``emergency''.
+Durante questa fase la sicurezza dell'agente è prioritaria, vengono ignorati tutti 
+i messaggi proveniente da Android fino alla risoluzione della situazione di emergenza.\\
+Le situazioni di emergenza sono gestite dal metodo \emph{emergency()}, possono 
+essere di tre tipi e ognuna prevede una diversa soluzione:
+\begin{itemize}
+	\item Allarme sul sensore sinistro: esegue una breve retromarcia 
+	e ruota lentamente sul posto verso destra.
+	\item Allarme sul sensore destro: esegue una breve retromarcia 
+	e ruota lentamente sul posto verso sinistra.
+	\item Allarme su entrambi i sensori: esegue una breve retromarcia 
+	e ruota velocemente sul posto verso sinistra.
+\end{itemize}
+Il resto del metodo \emph{loop()} è interamente compreso dentro un
+``if'' che controlla se Arduino è collegato ad una periferica in grado di 
+comunicare secondo il protocollo Android Open Accessory (AOA).\\
+Successivamente Arduino controlla se c'è un messaggio da parte di Android,
+se c'è allora lo decodifica ed esegue il comando impartito altrimenti va in uno 
+stato particolare in cui sa che è connesso ad una periferica ma non sta ricevendo 
+comandi. In questo caso abbiamo adottato la scelta più conservativa e cioè fermiamo 
+l'agente perché altrimenti, dato che gli stati assegnati agli output sono persistenti,
+i motori continuerebbero ad eseguire l'ultimo comando eseguito esponendo l'agente
+ad un pericolo.\\
+La decodifica del comando è effettuata da \emph{decodeCommand()} che divide la stringa 
+nelle sue tre parti fondamentali command, param1, param2, controlla che command
+sia un comando conosciuto e, nel caso che il comando preveda dei parametri aggiuntivi,
+che param1 e param2 rientrino negli intervalli previsti. In seguito tramite un costrutto 
+``switch-case'' applicato a command esegue le azione previste per quel dato comando o comando-parametri
+ricevuti. Sempre nell'ottica della prudenza se il comando ricevuto non riesce ad 
+essere decodificato correttamente si fermano i motori finché non arriva un comando 
+legittimo.\\
+Alla fine del ciclo \emph{loop()}, che sia stato ricevuto un messaggio corretto o meno,
+viene attivato il sensore di distanza a ultrasuoni, calcolata la distanza in centimetri
+con la formula illustrata precedentemente nella sezione 2.3.2 e inviata ad Android
+come messaggio di tipo INFO.\\
+Ci sono poi numerosi metodi per eseguire i singoli compiti:
+\begin{itemize}
+\item \emph{setDirection()}: dato che i motori sono identici e 
+sono montanti con la stessa polarità, dando la stessa potenza ad entrambi 
+ruoteranno nello stesso. Considerando che i due motori sono montanti in modo speculare sui due cingoli
+si tradurrebbe in una rotazione sul posto per l'agente. Per ovviare 
+il problema questo metodo riceve due parametri: side identifica su quale cingolo
+si vuole impostare la direzione il cui valore può essere LEFT, RIGHT, BOTH e direction
+indica la direzione che si vuole impostare e può assumere i valori FORWARD e BACKWARD.
+Con queste informazioni sarà il metodo ad impostare le correte direzioni ai motori 
+per far si che l'agente vada nella direzione effettivamente desiderata.
+\item \emph{brake()} e \emph{releaseBrake()}: rispettivamente attivano e disattivano i 
+freni dei motori. I motori ovviamente non sono dotati di freni meccanici ma è 
+l'Arduino Motor Shield che modula il segnale inviato ai motori in modo da farli 
+fermare velocemente in caso di frenata.
+\item \emph{moveForward()} e \emph{moveBackward()}: impostano la direzione di marcia 
+desiderata con \emph{setDirection()} e attivano i motori alle potenze ricevute come 
+parametri.
+\item \emph{turnLeft()} e \emph{turnRight()}: attivano il cingolo opposto alla 
+direzione di rotazione richiesta alla potenza ricevuta per parametro. Se il  parametro
+mode è impostato su TURN\_ON\_SPOT significa che è stata richiesta da Android la 
+rotazione sul posto e quindi oltre al cingolo sopracitato attiva anche l'altro 
+con pari potenza ma direzione opposta.
+\item \emph{stop()}: disattiva i motori. Può effettuare una fermata HARD o una SOFT.
+Nel primo caso usa \emph{brake()} per diminuire il tempo di frenata, nel secondo sarà la 
+sola inerzia a fermare il movimento.
+\item i metodi \emph{emergency()}, \emph{sensorsOk()}, \emph{FRIsOut()} e \emph{FLIsOut()}
+lavorano tutti all'unisono per evitare che l'agente esca dall'area di test: leggono costantemente 
+i valori di riflessività rilevati dai sensori QRD1114 e agiscono di conseguenza come 
+illustrato all'inizio della presente sezione. 
+
+
+
+\end{itemize}
