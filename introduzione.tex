@@ -3,5 +3,44 @@
 \fancyhead[R]{\bfseries Introduzione} 	
 \fancyfoot[C]{\thepage } 
 \addcontentsline{toc}{chapter}{Introduzione}
-\section* {Obiettivi}
-\section* {Strumenti utilizzati}
+I primi automi eseguivano azioni preimpostate semplici e ripetitive, erano poco 
+più che macchine utensili. Si pensi ai robot delle catene di produzione di un'autovettura, 
+i robot eseguono sempre le stesse mosse, si muovono sempre della stesa quantità 
+e si portano sempre nella stessa posizione, eseguono la loro azione programmata 
+e passano al successivo compito. Di sicuro non possono essere considerati intelligenti.\\
+Intelligente in ambito robotico ha una definizione completamente differente 
+dall'intelligenza così come la percepiamo in ambito umano. Una macchina non 
+possiede creatività, non impara e non immagina. Se sembra possedere una di queste 
+qualità è perché è stata programmata in tal senso. Una macchina non può andare oltre 
+la sua programmazione, o almeno non ha ancora potuto. Nessuna macchina ha superato 
+il Test di Turing\footnote{è una condizione proposta da Alan Turing nel 1950 
+che una macchina deve soddisfare per essere considerata intelligente.}, tranne 
+una: Eugene Goostman, un software appositamente sviluppato per emulare il pensiero 
+di un ragazzo di 13 anni e superare tale test. 
+L'intelligenza di una macchina ha quindi come limite invalicabile solo quella 
+del suo programmatore.\\
+In robotica e in informatica una macchina o un algoritmo sono considerati intelligenti
+se a seguito di un problema scelgono la soluzione più giusta o più efficiente.
+
+In questo lavoro di tesi la nostra intelligenza artificiale realizza una forma semplificata del \emph{bin-picking},
+tecnica usata in ambito industriale per identificare e prelevare oggetti 
+disposti alla rinfusa in un ambiente. Nel nostro caso si limita a due compiti 
+``classici'' per le IA\footnote{Intelligenza Artificiale}, cerca e identifica 
+il suo obbiettivo. All'avvio del sistema l'app Android che svolge le funzioni di IA
+ci chiede di selezionare tramite touch screen un colore visibile sul video 
+proveniente dalla camera. Una volta selezionato il colore e premuto il pulsante start 
+il robot si muove autonomamente alla ricerca di tale colore nell'ambiente. L'ambiente di test
+può avere qualsiasi forma ed estensione; per stabilire i suoi confini deve essere usato un 
+materiale a bassa riflessività come carta nera opaca oppure deve essere sopraelevato rispetto 
+all'area circostante. Il robot si aggira per l'ambiente evitando ostacoli e senza 
+uscire dall'area delimitata finché non trova un oggetto del colore cercato. 
+A questo punto avverte di aver raggiunto l'obbiettivo e si mette in attesa di un nuovo 
+input da parte dell'utente.
+
+Particolarmente interessante è che l'architettura software utilizzata permette 
+di cambiare l'obbiettivo da cercare in qualunque altra cosa, che sia un viso, un 
+forma particolare o un oggetto specifico semplicemente modificando o sostituendo il modulo che si occupa 
+del riconoscimento delle immagini senza dover minimamente alterare il resto del 
+codice che svolge funzioni di IA o comunicazione.
+
+
