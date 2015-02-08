@@ -2,12 +2,21 @@
 \chapter{Implementazione}
 \fancyhead[R]{\bfseries Implementazione} 	
 \fancyfoot[C]{\thepage }
-Il successivo diagramma descrive in generale il processo che preso un frame e un messaggio
+Il successivo diagramma descrive in generale il processo che: preso un frame e un messaggio
 di Arduino restituisce una risposta generata dalla logica dell'app.
 \begin{figure}[H] \center
-\includegraphics[scale=0.2]{immagini/package_diagram.png}
-\caption{Ciclo delle informazioni e dei comandi del sistema} 
+\includegraphics[width=\textwidth]{immagini/schema_processo_new.pdf}
+\caption{Processo decisionale del sistema} 
 \end{figure}
+Le fasi principali sono:
+\begin{enumerate}
+\item ricezione messaggio da Arduino.
+\item salvataggio e decodifica del messaggio.
+\item lettura del messaggio da parte del modulo di IA\footnote{Intelligenza Artificiale}.
+\item acquisizione dell'obbiettivo dall'ambiente.
+\item accodamento per la trasmissione del comando elaborato dal'IA.
+\item invio del comando ad Arduino.
+\end{enumerate}
 
 
 
@@ -24,10 +33,10 @@ infatti molto semplice cambiare totalmente il comportamento dell'agente o la
 codifica dei messaggi sostituendo o modificando una singola classe senza 
 coinvolgere il resto del codice.\\
 La modularizzazione a grana più grossa è a livello di pacchetto\footnote{Un contenitore 
-che racchiude classi che svolgono compitini affini}: ci sono tre pacchetti,
-ognuno con un compito preciso, e sono \textbf{logic}, \textbf{messaging} e \textbf{opencv}.
+che racchiude classi che svolgono compitini affini}. Ci sono tre pacchetti,
+ognuno con un compito preciso, \textbf{logic}, \textbf{messaging} e \textbf{opencv}.
 \begin{figure}[H] \center
-\includegraphics[scale=0.2]{immagini/package_diagram.png}
+\includegraphics[width=\textwidth]{immagini/interconnessione_pacchetti.pdf}
 \caption{Schema di interconnessione dei pacchetti} 
 \end{figure}
 
@@ -282,7 +291,7 @@ La classe espone anche altri metodi che mostrano (\emph{show()}) o nascondono
 (\emph{hide()}) la porzione di interfaccia che visualizza le indicazioni, oppure bloccano (\emph{lock()})
 e sbloccano (\emph{unlock()}) la possibilità di cambiare le indicazioni visualizzate.
 
-\subsubsection{La classe astratta \emph{BaseAi} e l'interfaccia \emph{IBaseAi}}
+\subsubsection{La classe astratta \emph{BaseAi} e l'interfaccia \emph{IBaseAi} del pacchetto \emph{ai}}
 Usando l'ereditarietà forniscono la base di partenza per la classe RobotLogic.\\
 L'interfaccia ha due metodi: \emph{targetPosition()} e \emph{think()}.
 BaseAi sfrutta l'interfaccia IBaseAi e implementa il metodo \emph{targetPosition()}. 
