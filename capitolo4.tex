@@ -24,7 +24,7 @@ l'agente che fa la cosa giusta al momento giusto. Il compito dell'agente è
 quello di stabilire una sequenza di azioni che portano al raggiungimento di
 uno stato obiettivo.\cite{agente}
 \section {Android}
-L'app per Android è stata sviluppata avendo come priorità la modularità. E' 
+L'app per Android è stata sviluppata avendo come priorità la modularità. È 
 infatti molto semplice cambiare totalmente il comportamento dell'agente o la 
 codifica dei messaggi sostituendo o modificando una singola classe senza 
 coinvolgere il resto del codice.\\
@@ -126,7 +126,7 @@ Questo pacchetto è un modulo completamente a se stante, è così possibile camb
  Command identifica l'azione da eseguire, Parameter1 e Parameter2 sono due parametri opzionali
  che modificano il comportamento standard dell'azione richiesta.
  \subsubsection{La classe \emph{IncomingMessage}}
- Questa classe è un ``singleton''\footnote{E' un design pattern descritto dalla 
+ Questa classe è un ``singleton''\footnote{È un design pattern descritto dalla 
  cosiddetta ``Gang of four'' nel libro ``Design Patterns''. 
  Permette la creazione di una sola istanza della classe e ne regola l'accesso. } 
  estende la classe Observable e insieme alla classe RobotLogic del 
@@ -220,7 +220,7 @@ public void start() {
 \end{lstlisting}
 Ottenuto da Java il riferimento allo ScheduledExecutorService si imposta l'esecuzione ad 
 intervalli regolari di READING\_POLLING\_TIME millisecondi del nostro CommunicatorThread.\\ 
-E' bene notare che la \emph{read()} fornita dall'ADK è bloccante, quindi finché Arduino
+È bene notare che la \emph{read()} fornita dall'ADK è bloccante, quindi finché Arduino
 non invia un messaggio, e questo è disponibile sul buffer di lettura, l'esecuzione di 
 \emph{run()} è interrotta. Questo comportamento potrebbe portare 
 all'indesiderata situazione in cui un messaggio in attesa di essere inviato ad Arduino
@@ -247,7 +247,7 @@ fine visualizzato a schermo.
 All'avvio si occupa di inizializzare OpenCV tramite la 
 callback \textit{BaseLoaderCallback} e ottiene il riferimento all'istanza dell'ADK
 tramite l'ADKToolkit, inizializza il Communicator e passa il riferimento di quest'ultimo
- a TargetSearch durante l'esecuzione.\\E' buona norma interrompere le connessioni e liberare il canale usato 
+ a TargetSearch durante l'esecuzione.\\È buona norma interrompere le connessioni e liberare il canale usato 
 nel momento in cui un'app viene chiusa. Per questo nel metodo \emph{onDestroy()} 
 viene chiuso il canale usato per comunicare con Arduino tramite il metodo \emph{close()}
 fornito dall'ADKToolkit e viene fermato lo scheduler che esegue il Communicator\\
@@ -262,7 +262,7 @@ di quest'ultima \emph{setTargetHsvColor()}. Questo sarà il colore che l'agente 
 nella scena, il suo obbiettivo.
 
 \subsubsection{La classe \emph{UpdateDirections}}
-Questa classe è un ``singleton''\footnote{E' un design pattern descritto dalla 
+Questa classe è un ``singleton''\footnote{È un design pattern descritto dalla 
 cosiddetta ``Gang of four'' nel libro ``Design Patterns''. 
 Permette la creazione di una sola istanza della classe e ne regola l'accesso. } 
 e si occupa di mostrare all'utente tramite  immagini e testi quello che l'agente
