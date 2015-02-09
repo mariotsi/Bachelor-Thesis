@@ -13,7 +13,7 @@ Le fasi principali sono:
 \item ricezione messaggio da Arduino.
 \item salvataggio e decodifica del messaggio.
 \item lettura del messaggio da parte del modulo di IA\footnote{Intelligenza Artificiale}.
-\item acquisizione dell'obbiettivo dall'ambiente.
+\item acquisizione dell'obiettivo dall'ambiente.
 \item accodamento per la trasmissione del comando elaborato dal'IA.
 \item invio del comando ad Arduino.
 \end{enumerate}
@@ -38,12 +38,12 @@ ognuno con un compito preciso, \textbf{logic}, \textbf{messaging} e \textbf{open
 
 \subsection {Il pacchetto \textit{opencv}}
 Il pacchetto \textbf{opencv} è costituito di due sole classi. Si occupa di analizzare 
-i frame proveniente dalla camera alla ricerca dell'obbiettivo, comunica poi la posizione 
-dell'obbiettivo o l'assenza dello stesso alla classe RobotLogic del pacchetto 
+i frame proveniente dalla camera alla ricerca dell'obiettivo, comunica poi la posizione 
+dell'obiettivo o l'assenza dello stesso alla classe RobotLogic del pacchetto 
 \textbf{logic}.
 \subsubsection{La classe \emph{ColorBlobDetector}}
-\emph{ColorBlobDetector} è la classe che effettivamente cerca l'obbiettivo nei
-frame proveniente dalla camera. L'obbiettivo gli viene fornito da RobotActivity 
+\emph{ColorBlobDetector} è la classe che effettivamente cerca l'obiettivo nei
+frame proveniente dalla camera. L'obiettivo gli viene fornito da RobotActivity 
 tramite \emph{setTargetHsvColor()} nel momento in cui l'utente lo indica 
 sull'interfaccia utente. I colori in OpenCV vengono rappresentati con un tipo di dato interno
 detto Scalar che può essere assimilato ad un array. Il metodo che esegue 
@@ -74,23 +74,23 @@ cioè il rettangolo di area minima che contiene per interno il contorno corrente
 scartando tutti i rettangoli minori di un certo valore e mantenendo un riferimento 
 a quello di area maggiore trovato fino a quel momento. I rettangoli saranno tutti colorati di blu
  tranne quello di area maggiore che sarà colorato di rosso. Sarà proprio questo 
- rettangolo il nostro obbiettivo.\\
+ rettangolo il nostro obiettivo.\\
  Fornisce un feedback all'utente sul colore scelto e la gamma di colori simili 
  che sono stati cercati.\\
  Solo tre dati forniti da questa classe servono alla RobotLogic per valutare l'azione 
  da intraprendere e sono:
- la posizione dell'obbiettivo, la larghezza del frame e il bounding rectangle 
- che racchiude l'obbiettivo.\\
+ la posizione dell'obiettivo, la larghezza del frame e il bounding rectangle 
+ che racchiude l'obiettivo.\\
  Le posizioni sono sempre riferite all'asse x in quanto l'agente non 
  ha capacità di movimento sull'asse y e possono essere:
  \begin{itemize}
-	\item TARGET\_POSITION\_LEFT: il centro dell'obbiettivo si trova a sinistra del centro del frame. 
-	\item TARGET\_POSITION\_RIGHT: il centro dell'obbiettivo si trova a destra del centro del frame. 
-	\item TARGET\_POSITION\_FRONT: il centro dell'obbiettivo e il centro del frame coincidono. 
-	\item TARGET\_POSITION\_NONE: l'obbiettivo non è visibile.
+	\item TARGET\_POSITION\_LEFT: il centro dell'obiettivo si trova a sinistra del centro del frame. 
+	\item TARGET\_POSITION\_RIGHT: il centro dell'obiettivo si trova a destra del centro del frame. 
+	\item TARGET\_POSITION\_FRONT: il centro dell'obiettivo e il centro del frame coincidono. 
+	\item TARGET\_POSITION\_NONE: l'obiettivo non è visibile.
 \end{itemize}
 Comanda ad UpdateDirection del pacchetto \textbf{logic} di mostrare le informazioni 
-corrispondenti alla posizione dell'obbiettivo.
+corrispondenti alla posizione dell'obiettivo.
 
 \subsection{Il pacchetto \textit{messaging}}
 Questo pacchetto è un modulo completamente a se stante, è così possibile cambiare il
@@ -114,8 +114,8 @@ Questo pacchetto è un modulo completamente a se stante, è così possibile camb
  Se il MessageType è STATE allora il Message può essere di quattro tipi: 
  \begin{itemize}
  	\item IDLE: l'agente non sta eseguendo alcuna azione.
- 	\item SEARCHING: l'agente si sta muovendo in cerca dell'obbiettivo.
- 	\item HUNTING: l'agente si sta muovendo verso l'obbiettivo.
+ 	\item SEARCHING: l'agente si sta muovendo in cerca dell'obiettivo.
+ 	\item HUNTING: l'agente si sta muovendo verso l'obiettivo.
  	\item EMERGENCY: l'agente è in emergenza, non eseguirà nessun comando fino al 
  	termine della situazione di emergenza. 
  \end{itemize}
@@ -180,7 +180,7 @@ stringhe da inviare Arduino ed espone numerosi metodi statici per la codifica ve
     destra e applicare ai motori potenza pari a \emph{velocity}.
     \item \emph{turnRight(int mode)}: comanda di ruotare verso 
     destra e applicare ai motori potenza pari a DEFAULT\_VELOCITY.  
-    \item \emph{search()}: comanda di cercare l'obbiettivo.
+    \item \emph{search()}: comanda di cercare l'obiettivo.
 \end{itemize}
 Nei metodi \emph{turnLeft} e \emph{turnRight}, \emph{mode} può assumere il valore 
 TURN\_ON\_SPOT o TURN\_NORMALLY che fanno girare l'agente rispettivamente utilizzando 
@@ -259,7 +259,7 @@ che esegue la media dei colori presenti in una regione di 8x8px intorno alle coo
 in cui è avvenuto il tocco da parte dell'utente. Fornisce il colore così calcolato a 
 alla classe TargetSearch del pacchetto \textbf{opencv} tramite il metodo pubblico 
 di quest'ultima \emph{setTargetHsvColor()}. Questo sarà il colore che l'agente cercherà
-nella scena, il suo obbiettivo.
+nella scena, il suo obiettivo.
 
 \subsubsection{La classe \emph{UpdateDirections}}
 Questa classe è un ``singleton''\footnote{È un design pattern descritto dalla 
@@ -292,7 +292,7 @@ Usando l'ereditarietà forniscono la base di partenza per la classe RobotLogic.\
 L'interfaccia ha due metodi: \emph{targetPosition()} e \emph{think()}.
 BaseAi sfrutta l'interfaccia IBaseAi e implementa il metodo \emph{targetPosition()}. 
 Tramite questo metodo TargetSearch fornisce all'AI la larghezza del frame, la posizione 
-dell'obbiettivo e il buonding rect dell'obbiettivo; a partire da questi verranno 
+dell'obiettivo e il buonding rect dell'obiettivo; a partire da questi verranno 
 calcolati altri parametri che saranno utilizzati in \emph{think()}.\\
 Con questa organizzazione si fa si che i comportamenti e i dati indispensabili per una classe di 
 AI siano definiti in BaseAI e quindi ogni nuova classe nata per sostituire o migliorare
@@ -312,12 +312,12 @@ allora tale distanza viene salvata nell'istanza in modo che successivamente si
 possa usare per valutare in modo più preciso la situazione.\\
 Il metodo principale della classe è \emph{think()} ed è invocato ogni volta che
 dal pacchetto opencv, e in particolare dalla classe TargetSearch, giunge un aggiornamento
-sull'obbiettivo, la sua eventuale presenza in scena e la sua posizione. \emph{think()}
+sull'obiettivo, la sua eventuale presenza in scena e la sua posizione. \emph{think()}
 viene effettivamente eseguito solo se sull'interfaccia utente è stato premuto "Start"
 e per prima cosa stabilisce in che fase l'iterazione precedente ha portato il sistema. \\
 Le possibilità sono:
 	\begin{itemize}
-	\item ``Cheer Phase'': indica che l'obbiettivo è stato trovato e l'agente sta
+	\item ``Cheer Phase'': indica che l'obiettivo è stato trovato e l'agente sta
 	girando su se stesso per segnalare la fine della ricerca.
 	\item ``Avoiding Phase'': indica che sulla traiettoria dell'agente si è presentato un ostacolo e lo sta aggirando. Si compone di tre sottofasi:
 	\begin{itemize}
@@ -325,25 +325,25 @@ Le possibilità sono:
 		\item Fase 2: si muove in avanti per un tempo prestabilito.
 		\item Fase 3: ruota di 90° nella direzione opposta a quella scelta nella fase 1.
 	\end{itemize}
-	\item ``Search Phase'': indica che l'obbiettivo non è stato ancora trovato e l'agente si sta muovendo per trovarlo.
+	\item ``Search Phase'': indica che l'obiettivo non è stato ancora trovato e l'agente si sta muovendo per trovarlo.
 	\end{itemize}
 Se si trova nella ``Cheer Phase'' ignora ogni comunicazione proveniente da 
 Arduino, finisce la rotazione di segnalazione e invoca il metodo \emph{reset()} di 
-RobotActivity per preparare il sistema all'inserimento di un nuovo obbiettivo da 
+RobotActivity per preparare il sistema all'inserimento di un nuovo obiettivo da 
 parte dell'utente.\\
 Se si trova nella ``Avoiding Phase'' esegue in successione le tre fasi. 
 Si può interrompere solo se durante le manovre di aggiramento dell'ostacolo
-l'obbiettivo compare nella scena.\\
-Se si trova nella ``Search Phase'' controlla se l'obbiettivo è presente in scena e 
+l'obiettivo compare nella scena.\\
+Se si trova nella ``Search Phase'' controlla se l'obiettivo è presente in scena e 
 si trova a meno di 30 centimetri, in caso di risposta affermativa ferma l'agente,
 interrompe l'esecuzione di \emph{think()} e attiva la ``Cheer Phase''. 
-Se l'obbiettivo non è in vista ma c'è un oggetto a meno di 30 centimetri ferma l'agente
+Se l'obiettivo non è in vista ma c'è un oggetto a meno di 30 centimetri ferma l'agente
 e attiva la ``Avoiding Phase''.\\
-Se l'obbiettivo non è visibile rimane in ``Search Phase'' e si muove in avanti.\\
-Se l'obbiettivo è visibile ma si trova a più di 30 centimetri effettua le correzioni di rotta
+Se l'obiettivo non è visibile rimane in ``Search Phase'' e si muove in avanti.\\
+Se l'obiettivo è visibile ma si trova a più di 30 centimetri effettua le correzioni di rotta
 necessarie per portarlo in direzione di marcia.\\
-Se l'obbiettivo è precisamente di fronte all'agente si muoverà in quella direzione.\\ 
-La rotazione necessaria per portare l'obbiettivo esattamente di fronte all'agente 
+Se l'obiettivo è precisamente di fronte all'agente si muoverà in quella direzione.\\ 
+La rotazione necessaria per portare l'obiettivo esattamente di fronte all'agente 
 implica movimenti lenti e precisi che è difficile ottenere con i motori DC di cui è
 fornito l'agente. Lo scenario tipico è vedere i motori sforzarsi di muovere l'agente
 con un certo quantitativo di energia, aumentare quell'energia di un'unità e vedere 
@@ -354,8 +354,8 @@ la presenza di piccoli ostacoli sotto l'agente. Per ovviare a questo problema ch
 una corretta movimentazione dell'agente quando erano necessari movimenti precisi 
 si è usato una soluzione adattiva che permette all'agente di trovare sempre la 
 minima energia necessaria per muoversi. Per far questo l'agente prende come riferimento 
-la posizione dell'obbiettivo e tenta di ruotare, se all'iterazione successiva 
-non nota uno spostamento relativamente all'obbiettivo allora aumenta 
+la posizione dell'obiettivo e tenta di ruotare, se all'iterazione successiva 
+non nota uno spostamento relativamente all'obiettivo allora aumenta 
 l'energia inviata ad i motori. Appena si muove l'energia cessa di essere 
 aumentata e l'agente ruota in modo fluido e controllato.
 
