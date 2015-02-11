@@ -2,32 +2,31 @@
 \chapter*{Conclusioni}
 \addcontentsline{toc}{chapter}{Conclusioni}
 \fancyfoot[C]{\thepage}
-Il robot riesce 
-a distinguere colori che siano distanti tra loro 10$^\circ$ nel modello di colori HSV
-il che permette di cercare circa 36 colori differenti. Data l'assenza di conoscenza 
-dell'ambiente circostante il robot non segue un percorso efficiente per la ricerca ma trova comunque l'obiettivo
-nel 95\% dei casi. Molte situazioni di stallo si risolvono grazie alla randomizzazione 
-di alcune parti del processo decisionale. Il 5\% di fallimenti è dovuto a situazioni di stallo 
-che si verificano in situazioni in cui, vicini ai bordi dell'ambiente, sono posizionati 
-due o più ostacoli. Il 95\% di successi supera ampiamente il limite posto in fase di progettazione, 
-quindi tutti gli obiettivi prefissati per questo lavoro di tesi sono stati raggiunti in modo
-ottimale.
-La grande modularità del software ha di fatto creato un semplice framework per 
-la creazione di nuove intelligenze artificiali da usare con una qualsiasi piattaforma
-composta da un'app Android ed un Arduino Due. Come visto nel Capitolo 4, l'estensione della
-classe BaseAI e l'implementazione del metodo \emph{think()} è tutto quello che serve per
+Il robot riesce a distinguere colori che siano distanti tra loro 10$^\circ$ nel modello di colori HSV,
+il che permette di cercare 36 colori differenti. 
+
+Riesce a trovare adeguatamente 
+l'obiettivo seppur senza seguire un percorso efficiente data l'assenza di conoscenza 
+dell'ambiente di sperimentazione. Molte situazioni di stallo si risolvono grazie alla randomizzazione 
+di alcune parti del processo decisionale mentre altre, perlopiù avvenute in presenza di due 
+oggetti nelle vicinanze dei bordi dell'ambiente, hanno richiesto un intervento esterno per la soluzione. 
+L'affidabilità dimostrata nella ricerca è comunque tale che riteniamo tutti gli obiettivi 
+prefissati per questo lavoro di tesi raggiunti in modo ottimale.
+
+La grande modularità del software ha di fatto creato un semplice framework 
+per l'implementazione di nuovi algoritmi di ricerca \emph{context-aware}\footnote{che sono a conoscenza del contesto in cui operano.}, 
+da usare con una qualsiasi piattaforma composta da un'app Android ed un Arduino Due. 
+Come visto nel Capitolo 4, l'estensione della
+classe BaseAi e l'implementazione del metodo \emph{think()} è tutto ciò che serve per
 creare un algoritmo di IA funzionante.
 \subsection* {Sviluppi futuri}
-Il software è stato rilasciato con licenza Open Source è quindi migliorabile, 
-modificabile e personalizzabile da futuri studenti o semplici appassionati.
-Miglioramenti possibili sono:
+Il software è stato rilasciato con licenza BSD è quindi migliorabile, 
+modificabile e personalizzabile da futuri studenti.
+\\Miglioramenti possibili sono:
 \begin{itemize}
 \item aggiungere sensori per la navigazione come GPS, 
-bussole e giroscopi. Permetterebbero di eliminare la navigazione randomizzata e seguire invece un percorso efficiente ed efficace
-di ricerca dell'obiettivo.
-\item mappare gli ostacoli trovati in modo da ottenere una mappa dell'ambiente di test.
-\item mappare gli oggetti di colori diversi trovati in modo da poterli più facilmente localizzare 
-in una successiva ricerca.
-\item aggiungere un dispositivo prensile in modo da poter manipolare l'obiettivo una volta trovato.
+bussole e giroscopi. Permetterebbero di eliminare la navigazione randomizzata e seguire un efficiente percorso di ricerca dell'obiettivo.
+\item implementare una base di conoscenza in grado di tenere traccia degli ostacoli e degli oggetti riconosciuti in modo da velocizzare ogni successiva ricerca.
+\item aggiungere un attuatore in grado di manipolare l'obiettivo una volta individuato.
 \end{itemize}
 
