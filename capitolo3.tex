@@ -7,34 +7,35 @@ Per dare al robot una visione dell'ambiente circostante ci serviva una libreria 
 visione artificiale. Le più famose disponibili per Java sono OpenCV e JavaCV; 
 la nostra scelta è stata OpenCV per via della maggiore disponibilità di documentazione. 
 OpenCV\footnote{Open Source Computer Vision} è stata originariamente sviluppata 
-da Intel che cercava di migliorare le prestazioni delle loro CPU con applicazioni
-computazionalmente pesanti come per esempio gli algoritmi di \textit{ray tracing}
+da Intel per migliorare le prestazioni delle loro CPU con applicazioni
+computazionalmente pesanti come per esempio gli algoritmi di \textit{ray tracing}.
 \footnote{Tecnica di geometrica ottica che analizza il percorso dei raggi di luce.
 In grafica 3D è un algoritmo di rendering che costruisce la scena facendo
 partire i raggi luminosi dalla camera (visuale del giocatore) invece che dalla 
-sorgente luminosa.\cite{ray_tracing}}  ed è ora disponibile sotto licenza BSD. 
+sorgente luminosa.\cite{ray_tracing}} Questa libreria è rilasciata sotto licenza BSD. 
 \\La libreria per poter funzionare su un 
  dispositivo Android ha bisogno di un'applicazione di supporto chiamata OpenCV 
  Manager che può essere scaricata dal Play Store o installata direttamente con il
- pacchetto apk.\footnote{Android Package, il tipo di file delle App Android simile 
- al formato JAR } La libreria viene caricata in modo asincrono all'avvio dell'App
- e fornisce ogni frame come una matrice dove ogni cella rappresenta un pixel; 
+ pacchetto APK.\footnote{Android Package, il tipo di file delle app Android simile 
+ al formato JAR } La libreria viene caricata in modo asincrono all'avvio dell'app
+ e fornisce ogni frame come una matrice dove ogni elemento rappresenta un pixel; 
  OpenCV usa il tipo di dato interno Mat per rappresentare le matrici.
  Tutte le operazioni effettuate su oggetti di tipo Mat usano algoritmi appositamente 
  ottimizzati per le operazioni tra matrici. 
 
 \section {ADK}
-In Android, a partire dalla versione 3.1, è supportato il protocollo Android Open 
-Accessory (AOA), 
-ogni accessorio sviluppato per Android deve supportare lo stesso protocollo. 
+In Android, a partire dalla versione 2.3.4, è supportato il protocollo Android Open 
+Accessory (AOA). Ogni accessorio sviluppato per Android deve comunicare con il sistema operativo 
+tramite lo stesso protocollo. 
 \\A causa della limitata autonomia dei dispositivi su cui Android è maggiormente 
-utilizzato (smarthphone e tablet) l'AOA impone che l'accessorio funga da host 
+utilizzato (smarthphone e tablet), l'AOA impone che l'accessorio funga da host 
 e alimenti quindi il bus utilizzato
-\\Per usare Arduino come un accessorio per Android e rispettare lo standard AOA 
-esiste la libreria \textit{adk.h} che permette di dialogare con un dispositivo 
-Android dopo un'accurata configurazione. Android distingue diversi accessori 
-sulla base di informazioni che ogni accessorio fornisce all'atto della connessione, 
-queste informazioni sono:
+\\A partire dal 2011, Google ha rilasciato open source gli schemi e l'implementazione 
+della libreria ADK per tutti i dispositivi Arduino compatibili, così da fornire 
+un'interfaccia comune per garantire la comunicazione con i dispositivi Android, 
+previa un'opportuna configurazione. Android distingue diversi accessori 
+sulla base delle informazioni da loro forniti durante la connessione preliminare. 
+\\Queste informazioni possono essere distinte nei seguenti valori:
 \begin{itemize}
 \item Vendor
 \item Name
@@ -44,15 +45,15 @@ queste informazioni sono:
 \item Serial
 \end{itemize} 
 Il dispositivo Android accetterà la richiesta di connessione solo se le stringhe 
-identificative in suo possesso combaciano perfettamente con quelle fornite 
+identificative in suo possesso combaciano con quelle fornite 
 dall'accessorio. Per ottenere effettivamente la connessione bisogna indicare ad 
 Android quali sono gli accessori supportati e quale applicazioni è in grado di 
 gestire un particolare accessorio. Questo si ottiene inserendo la successiva 
-direttiva nel Manifest file dell'App
+direttiva nel Manifest file dell'app
 
 \lstset{language=XML}
 
-\begin{lstlisting}[caption=Porzione del Manifest file dell'App]
+\begin{lstlisting}[caption=Porzione del Manifest file dell'app]
 ...
 <meta-data
     android:name="android.hardware.usb.action.
@@ -60,10 +61,11 @@ direttiva nel Manifest file dell'App
     android:resource="@xml/usb_accessory_filter" />
 ...
 \end{lstlisting}
-In questo modo alla connessione di qualsiasi accessorio sarà il sistema operativo
-a suggerire di aprire una certa app se l'accessorio connesso è presente nel file 
+Alla connessione di qualsiasi accessorio, il sistema operativo sarà incaricato 
+di suggerire ed aprire l'apposita app in grado di gestire l'accessorio connesso. 
+L'associazione con un particolare accessorio viene verificato tramite il file 
 usb\_accessory\_filter.xml associato.
-\\Nel nostro caso il file usb\_accessory\_filter.xml si presenta così
+\\Nel nostro caso il file usb\_accessory\_filter.xml si presenta così:
 \begin{lstlisting}[caption=usb\_accessory\_filter.xml]
 <resources>
     <usb-accessory
@@ -75,16 +77,16 @@ usb\_accessory\_filter.xml associato.
 Le stesse identiche stringhe saranno impostate durante la fase di configurazione 
 di Arduino in modo da permette l'accoppiamento.
 \section {ADK Toolkit}
-L'ADK toolkit è una libreria che aggiunge un grado di astrazione all'ADK, l'invio
- e la ricezione dei messaggi sono semplificati così come l'inizializzazione della 
- connessione.\\
+L'ADK toolkit è una libreria che aggiunge un grado di astrazione all'ADK, semplificando 
+l'inizializzazione della connessione, l'invio e la ricezione dei messaggi.\\
 Il toolkit si basa su due classi principali: AdkManager e AdkMessage.	\\	
 AdkManager espone metodi per la gestione della connessione e per l'invio e la 
 ricezioni di dati. AdkMessage rappresenta il messaggio ricevuto dall'accessorio 
-ne suo formato nativo, cioè un array di byte; tramite dei metodi ausiliari, 
+nel suo formato nativo, cioè un array di byte; tramite dei metodi ausiliari, 
 \textit{getString()}, \textit{getFloat()}, \textit{getInt()}, è possibile 
-ottenere una versione tipizzata del messaggio e naturalmente la versione ``grezza'' 
-dei dati con \textit{getBytes()} e \textit{getByte()}.\\
+ottenere il typecast del messaggio ricevuto, normalmente rappresentato da un array di byte. 
+Il recupero del messaggio originale può essere ottenuto grazie ai metodi 
+\textit{getBytes()} e \textit{getByte()}.\\
 Grazie a questa libreria l'uso dell'ADK, originariamente poco intuitivo, diventa 
 efficiente ed elegante
 \lstset{
@@ -110,7 +112,7 @@ private AdkManager mAdkManager;
 
 @Override
 protected void onCreate(Bundle savedInstanceState) {
-    // ...
+    ...
     mAdkManager = new AdkManager(this);
 }
 
@@ -120,6 +122,7 @@ protected void onResume() {
     mAdkManager.open();
 }
 \end{lstlisting}
+
 \begin{lstlisting}[caption=Lettura e scrittura dati]
 // Write
 adkManager.write("Ciao da Android!");
@@ -127,5 +130,12 @@ adkManager.write("Ciao da Android!");
 // Read
 AdkMessage response = adkManager.read();
 System.out.println(response.getString());
-// Could outputs: "Ciao da Arduino!"
+// Esempio di output: "Ciao da Arduino!"
+\end{lstlisting}
+\begin{lstlisting}[caption=Chiusura della connessione con l'accessorio]
+@Override
+protected void onDestroy() {
+    ...
+    mArduino.close();
+}
 \end{lstlisting}
