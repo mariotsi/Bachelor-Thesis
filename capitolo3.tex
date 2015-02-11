@@ -14,14 +14,14 @@ In grafica 3D è un algoritmo di rendering che costruisce la scena facendo
 partire i raggi luminosi dalla camera (visuale del giocatore) invece che dalla 
 sorgente luminosa.\cite{ray_tracing}} Questa libreria è rilasciata sotto licenza BSD. 
 \\La libreria per poter funzionare su un 
- dispositivo Android ha bisogno di un'applicazione di supporto chiamata OpenCV 
- Manager che può essere scaricata dal Play Store o installata direttamente con il
- pacchetto APK.\footnote{Android Package, il tipo di file delle app Android simile 
- al formato JAR } La libreria viene caricata in modo asincrono all'avvio dell'app
- e fornisce ogni frame come una matrice dove ogni elemento rappresenta un pixel; 
- OpenCV usa il tipo di dato interno Mat per rappresentare le matrici.
- Tutte le operazioni effettuate su oggetti di tipo Mat usano algoritmi appositamente 
- ottimizzati per le operazioni tra matrici. 
+dispositivo Android ha bisogno di un'applicazione di supporto chiamata OpenCV 
+Manager che può essere scaricata dal Play Store o installata direttamente con il
+pacchetto APK.\footnote{Android Package, il tipo di file delle app Android simile 
+al formato JAR } La libreria viene caricata in modo asincrono all'avvio dell'app
+e fornisce ogni frame come una matrice dove ogni elemento rappresenta un pixel; 
+OpenCV usa il tipo di dato interno Mat per rappresentare le matrici.
+Tutte le operazioni effettuate su oggetti di tipo Mat usano algoritmi appositamente 
+ottimizzati per le operazioni tra matrici. 
 
 \section {ADK}
 In Android, a partire dalla versione 2.3.4, è supportato il protocollo Android Open 
