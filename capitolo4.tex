@@ -371,7 +371,7 @@ In Arduino il metodo principale è \emph{loop()}, che come dice il nome stesso v
 in ciclo infinito. Gli stati assegnati agli output sono persistenti attraverso 
 le varie iterazioni del ciclo.
 La prima operazione fatta è il controllo dei sensori di riflessività. Se dovessero 
-essere in stato di ``conservativo''warning'' si interrompe l'esecuzione del \emph{loop()} 
+essere in stato di ``warning'' si interrompe l'esecuzione del \emph{loop()} 
 forzandolo a passare all'iterazione successiva e si fa un altro controllo; se i 
 sensori sono ancora in ``warning'' allora si innesca la modalità ``emergency''.
 Durante questa fase la sicurezza dell'agente è prioritaria: vengono ignorati tutti 
@@ -390,7 +390,7 @@ Il resto del metodo \emph{loop()} è interamente compreso dentro un
 \emph{if} che controlla se Arduino è collegato ad una periferica in grado di 
 comunicare secondo il protocollo Android Open Accessory (AOA).\\
 Successivamente Arduino controlla se è disponibile un messaggio inviato da Android, 
-procedendo in tal caso alla de\emph{}codifica ed all'esecuzione del comando ricevuto. 
+procedendo in tal caso alla decodifica ed all'esecuzione del comando ricevuto. 
 In caso contrario entra in uno stato ``conservativo'' in cui è connesso ad una periferica 
 ma non sta ricevendo comandi. L'accesso a questo stato provoca l'immediata fermata 
 dell'agente in quanto, dato che i motori continuerebbero ad eseguire l'ultimo 
