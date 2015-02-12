@@ -30,7 +30,7 @@ L'app per Android è stata sviluppata avendo come priorità la modularità.
 Difatti è previsto un meccanismo per alterare il comportamento dell'agente, 
 sostituendo o modificando una singola classe senza coinvolgere il resto del codice.\\
 La modularizzazione a grana grossa viene fatta a livello di pacchetto\footnote{Un contenitore 
-che racchiude classi che svolgono compitini affini}. Ci sono tre pacchetti,
+che racchiude classi che svolgono compitini affini.}. Ci sono tre pacchetti,
 ognuno con un compito preciso, \textbf{logic}, \textbf{messaging} e \textbf{opencv}.
 \begin{figure}[H] \center
 \includegraphics[width=\textwidth]{immagini/interconnessione_pacchetti.pdf}
@@ -51,9 +51,9 @@ sull'interfaccia utente. I colori in OpenCV vengono rappresentati con un tipo di
 detto Scalar che si comporta in modo simile ad un array. Il metodo che esegue 
 l'operazione di ricerca è \emph{process()}. Per prima cosa converte lo schema di 
 colori del frame sotto analisi da RGBa\footnote{Ogni colore è rappresentato da 
-quattro canali: R (red), G (green), B (blue) e a (alpha) } a HSV\footnote{Anche in questo
+quattro canali: R (red), G (green), B (blue) e a (alpha).} a HSV\footnote{Anche in questo
 schema i colori sono rappresentati da quattro canali ma hanno denominazione e 
-significato differenti: H (hue), S (saturation), V (value) e  a (alpha)} e filtra l'immagine in modo che rimangano solo 
+significato differenti: H (hue), S (saturation), V (value) e  a (alpha).} e filtra l'immagine in modo che rimangano solo 
 i pixel che hanno un colore che si trova entro un certo intorno del colore cercato.
 Viene poi chiamata la funzione fornita da OpenCV \emph{findContours()} che cerca i contorni delle
 zone con il colore di nostro interesse e li restituisce come una un ArrayList di MatOfPoint;
@@ -129,7 +129,7 @@ che modificano il comportamento standard dell'azione richiesta.
 \subsubsection{La classe \emph{IncomingMessage}}
 Questa classe è un ``singleton''\footnote{È un design pattern descritto dalla 
 cosiddetta ``Gang of four'' nel libro ``Design Patterns''. 
-Permette la creazione di una sola istanza della classe e ne regola l'accesso. } 
+Permette la creazione di una sola istanza della classe e ne regola l'accesso.} 
 estende la classe Observable e insieme alla classe RobotLogic del 
 pacchetto \textbf{logic} implementa il design pattern ``Observer-Observable''. 
 \\Accoglie il messaggio ricevuto da Arduino, crea un oggetto di tipo ArduinoMessage 
@@ -267,7 +267,7 @@ di quest'ultima \emph{setTargetHsvColor()}.
 Questa classe è un \emph{singleton} e si occupa di mostrare all'utente tramite 
 immagini e testi quello che l'agente
 sta facendo e quale sarà la sua prossima  mossa. Dovendo agire 
-sull'UI\footnote{User Interface, interfaccia utente} deve essere eseguita sul thread
+sull'UI\footnote{User Interface, interfaccia utente.} deve essere eseguita sul thread
 che si occupa dell'UI, per questo implementa l'interfaccia \emph{Runnable} e 
 ogni sua esecuzione è lanciata  tramite \emph{runOnUiThread()}. 
 Le informazioni visualizzabili sono limitate e ben distinte,
