@@ -5,7 +5,7 @@
 È definito ``agente'' una qualunque entità in grado di percepire l'ambiente
 circostante attraverso dei sensori e di eseguire delle azioni attraverso degli
 attuatori. Nel campo dell'intelligenza artificiale è definito intelligente quel-
-l'agente che fa la cosa giusta al momento giusto. Il compito dell'agente è
+l'agente che ``fa la cosa giusta al momento giusto''. Il compito dell'agente è
 quello di stabilire una sequenza di azioni che portano al raggiungimento di
 uno stato obiettivo.\cite{agente}
 
@@ -47,40 +47,40 @@ dell'obiettivo o l'assenza dello stesso alla classe RobotLogic del pacchetto
 ColorBlobDetector è la classe che effettivamente cerca l'obiettivo nei
 frame proveniente dalla camera. L'obiettivo gli viene fornito da RobotActivity 
 tramite \emph{setTargetHsvColor()} nel momento in cui l'utente lo indica 
-sull'interfaccia utente. I colori in OpenCV vengono rappresentati con un tipo di dato interno
-detto Scalar che si comporta in modo simile ad un array. Il metodo che esegue 
+sull'interfaccia utente. I colori in OpenCV vengono rappresentati con il tipo di dato interno
+Scalar che si comporta in modo simile ad un array. Il metodo che esegue 
 l'operazione di ricerca è \emph{process()}. Per prima cosa converte lo schema di 
 colori del frame sotto analisi da RGBa\footnote{Ogni colore è rappresentato da 
 quattro canali: R (red), G (green), B (blue) e a (alpha).} a HSV\footnote{Anche in questo
 schema i colori sono rappresentati da quattro canali ma hanno denominazione e 
 significato differenti: H (hue), S (saturation), V (value) e  a (alpha).} e filtra l'immagine in modo che rimangano solo 
 i pixel che hanno un colore che si trova entro un certo intorno del colore cercato.
-Viene poi chiamata la funzione fornita da OpenCV \emph{findContours()} che cerca i contorni delle
-zone con il colore di nostro interesse e li restituisce come una un ArrayList di MatOfPoint;
+Viene poi chiamata la funzione di OpenCV \emph{findContours()} che cerca i contorni delle
+zone con il colore di nostro interesse e li restituisce come una ArrayList di MatOfPoint.\\
 MatOfPoint è un tipo di dato di OpenCV che è usato per memorizzare una quantità variabile
 di punti che sono in relazione tra di loro, come quelli che delineano un contorno.
-In seguito cerca il contorno che ha area maggiore e scarta tutti quelli che sono più piccoli 
-del limite impostato ad un un'ordine di grandezza in meno. I contorni rimasti 
+In seguito \emph{process()} cerca il contorno che ha area maggiore e scarta tutti quelli che sono più piccoli 
+della soglia impostata ad un decimo del maggior valore di area così trovato. I contorni rimasti 
 saranno quelli analizzati da TargetSearch. La scelta del limite è 
 seguita a delle prove empiriche che hanno mostrato come questa soglia permetta di
 scartare la quasi totalità di falsi positivi dovuti a riflessi o errori di 
 rilevamento del colore. 
 
 \subsubsection{La classe \emph{TargetSearch}}
-Questa classe per prima cosa invoca \emph{process()} di ColorBlobDetector passandogli
+Il metodo \emph{searchColours()} di questa classe per prima cosa invoca \emph{process()} di ColorBlobDetector passandogli
 il frame da analizzare e raccoglie i risultati tramite \emph{getContours()} che restituisce 
 i contorni individuati da \emph{process()}.\\
 Scorre poi uno ad uno i contorni così ricevuti e trova per ognuno un \emph{bounding rectangle}, 
 cioè il rettangolo di area minima che contiene per intero il contorno corrente, 
 scartando tutti i rettangoli minori di un certo valore e mantenendo un riferimento 
-a quello di area maggiore trovato fino a quel momento. I rettangoli saranno tutti colorati di blu
+a quello di area maggiore trovato fino a quel momento. Sull'immagine visualizzata i rettangoli saranno tutti colorati di blu
 tranne quello di area maggiore che sarà colorato di rosso. Sarà proprio questo 
 rettangolo il nostro obiettivo.\\
 Fornisce un feedback all'utente sul colore scelto e la gamma di colori simili 
-che sono stati cercati.\\
+che sono stati cercati. 
 Solo tre dati forniti da questa classe servono alla RobotLogic per valutare l'azione 
-da intraprendere e sono:
-la posizione dell'obiettivo, la larghezza del frame e il bounding rectangle 
+da intraprendere:
+la posizione dell'obiettivo, la larghezza del frame e il \emph{bounding rectangle} 
 che racchiude l'obiettivo.\\
 Le posizioni sono sempre riferite all'asse x in quanto l'agente non 
 ha capacità di movimento sull'asse y e possono essere:
@@ -99,13 +99,13 @@ protocollo di comunicazione senza alterare la logica dell'agente; al suo interno
 avviene la codifica e la decodifica di tutte le stringhe inerenti i messaggi ricevuti e 
 inviati.
 \\Nel nostro caso i messaggi sono formati da tre byte separati da virgole. I tre 
-valori potranno quindi assumere 255 valori diversi.
+valori potranno quindi assumere 256 valori diversi.
 I messaggi diretti da Arduino ad Android hanno questa forma:
 \begin{center}
 \textbf{MessageType,Message,Data}
 \end{center}
-dove MessageType può assumere due valori: INFO, indica che il messaggio trasporta un
-dato informativo, o STATE, indica che il messaggio comunica lo stato in cui si trova Arduino.
+dove MessageType può assumere due valori: INFO, che indica che il messaggio trasporta un
+dato informativo, o STATE, che indica che il messaggio comunica lo stato in cui si trova Arduino.
 \\Se il MessageType è INFO allora il Message può essere di due tipi: 
 \begin{itemize}\item DISTANCE: sulla porzione Data del messaggio sarà presente 
 la distanza del primo oggetto di fronte all'agente.
@@ -119,18 +119,18 @@ Se il MessageType è STATE allora il Message può essere di quattro tipi:
 	\item EMERGENCY: l'agente è in emergenza, non eseguirà nessun comando fino al 
 	termine della situazione di emergenza. 
 \end{itemize}
-I messaggi diretti da Android ad Arduino hanno invece questa forma:
+I messaggi diretti da Android ad Arduino hanno invece la forma:
 \begin{center}
 \textbf{Command,Parameter1,Parameter2}
 \end{center}
-Command identifica l'azione da eseguire, Parameter1 e Parameter2 sono due parametri opzionali
+in cui Command identifica l'azione da eseguire, Parameter1 e Parameter2 sono due parametri opzionali
 che modificano il comportamento standard dell'azione richiesta.
 
 \subsubsection{La classe \emph{IncomingMessage}}
-Questa classe è un ``singleton''\footnote{È un design pattern descritto dalla 
+Questa classe è un \emph{singleton}\footnote{È un design pattern descritto dalla 
 cosiddetta ``Gang of four'' nel libro ``Design Patterns''. 
 Permette la creazione di una sola istanza della classe e ne regola l'accesso.} 
-estende la classe Observable e insieme alla classe RobotLogic del 
+che estende la classe Observable e insieme alla classe RobotLogic del 
 pacchetto \textbf{logic} implementa il design pattern ``Observer-Observable''. 
 \\Accoglie il messaggio ricevuto da Arduino, crea un oggetto di tipo ArduinoMessage 
 per decodificare e custodire il messaggio ricevuto e informa gli Observer della presenza 
@@ -257,7 +257,7 @@ In aggiunta alle normali funzioni di un'Activity, RobotActivity integra un
 listener per gli eventi touch localizzati all'interno della porzione di 
 interfaccia utente che mostra il video proveniente dalla camera. In tal caso, 
 viene invocato il metodo \emph{onTouch()} ereditato da View.OnTouchListener 
-che esegue la media dei colori presenti in una regione di 8x8 px intorno alle coordinate
+che esegue la media dei colori presenti in una regione di 8x8 pixel intorno alle coordinate
 in cui è avvenuto il tocco da parte dell'utente. Il colore calcolato, 
 che rappresenta l'oggetto ricercato dall'agente nella scena, sarà passato 
 alla classe TargetSearch del pacchetto \textbf{opencv} tramite il metodo pubblico 
@@ -295,7 +295,7 @@ Tramite questo metodo, TargetSearch fornisce all'IA la larghezza del frame, la p
 dell'obiettivo e il \emph{buonding rect} dell'obiettivo; a partire da quest'ultimi saranno 
 calcolati i valori di \emph{mFrameWidth}, \emph{mTargetCenter}, \emph{mTargetInSight},
 \emph{mTargetDirection} e \emph{mTargetWidth} che saranno utilizzati in \emph{think()}.\\
-Con questa organizzazione si fa si che i comportamenti e i dati indispensabili per una classe di 
+Questa organizzazione fa sì che i comportamenti e i dati indispensabili per una classe di 
 IA siano definiti in BaseAi e quindi ogni nuova classe nata per sostituire o migliorare
 la logica attuale dovrà estendere BaseAi e implementare \emph{think()} 
 
@@ -340,7 +340,9 @@ si trova a meno di 30 centimetri, in caso di risposta affermativa ferma l'agente
 interrompe l'esecuzione di \emph{think()} e attiva la ``Cheer Phase''. 
 Se l'obiettivo non è in vista ma c'è un oggetto a meno di 30 centimetri ferma l'agente
 e attiva la ``Avoiding Phase''.\\
-Se l'obiettivo non è visibile rimane in ``Search Phase'' e si muove in avanti.\\
+Se l'obiettivo non è visibile rimane in ``Search Phase'' e si muove in avanti, 
+saranno poi i bordi dell'ambiente di sperimentazione ad innescare la modalità di 
+emergenza di Arduino e causare quindi una rotazione dell'agente.\\
 Se l'obiettivo è visibile ma si trova a più di 30 centimetri effettua le correzioni di rotta
 necessarie per portarlo in direzione di marcia.\\
 Se l'obiettivo è precisamente di fronte all'agente si muoverà in quella direzione.\\ 
@@ -353,7 +355,7 @@ mettere in rotazione l'agente cambia in funzione di troppe variabili:
 la direzione di rotazione, l'uso di entrambi i cingoli o solamente uno, 
 la presenza di piccoli ostacoli sotto l'agente. Per ovviare a questo problema che impedisce 
 una corretta movimentazione dell'agente quando sono necessari movimenti precisi 
-si è usata una soluzione adattiva che permette all'agente di trovare sempre la 
+è stata usata una soluzione adattiva che permette all'agente di trovare sempre la 
 minima energia necessaria per muoversi. Per far questo l'agente prende come riferimento 
 la posizione dell'obiettivo e tenta di ruotare, se all'iterazione successiva 
 non nota uno spostamento relativamente all'obiettivo, allora aumenta 
@@ -370,7 +372,7 @@ la connessione seriale a 115200 bps.\\
 In Arduino il metodo principale è \emph{loop()}, che come dice il nome stesso viene eseguito
 in ciclo infinito. Gli stati assegnati agli output sono persistenti attraverso 
 le varie iterazioni del ciclo.
-La prima operazione fatta è il controllo dei sensori di riflessività. Se dovessero 
+La prima operazione fatta è il controllo dei sensori di riflessività: se dovessero 
 essere in stato di ``warning'' si interrompe l'esecuzione del \emph{loop()} 
 forzandolo a passare all'iterazione successiva e si fa un altro controllo; se i 
 sensori sono ancora in ``warning'' allora si innesca la modalità ``emergency''.
@@ -384,7 +386,7 @@ essere di tre tipi:
 	\item Allarme sul sensore destro: esegue una breve retromarcia 
 	e ruota lentamente sul posto verso sinistra.
 	\item Allarme su entrambi i sensori: esegue una breve retromarcia 
-	e ruota velocemente sul posto verso sinistra.
+	e ruota velocemente sul posto in una direzione scelta casualmente.
 \end{itemize}
 Il resto del metodo \emph{loop()} è interamente compreso dentro un
 \emph{if} che controlla se Arduino è collegato ad una periferica in grado di 
@@ -403,7 +405,7 @@ che param1 e param2 rientrino negli intervalli previsti. In seguito tramite un c
 ricevuti. Per rafforzare l'approccio conservativo sopra citato, se il comando 
 ricevuto non riesce ad essere decodificato correttamente 
 si fermano i motori finché non arriva un comando legittimo.\\
-Alla fine del ciclo \emph{loop()}, che sia stato ricevuto un messaggio corretto o meno,
+Alla fine del ciclo \emph{loop()}, indipendentemente dal fatto che sia stato ricevuto un messaggio corretto,
 viene attivato il sensore di distanza a ultrasuoni, calcolata la distanza in centimetri
 con la formula illustrata precedentemente nella sezione 2.3.2 e inviata ad Android
 come messaggio di tipo INFO.\\
@@ -418,7 +420,7 @@ il problema questo metodo riceve due ha come parametri \emph{side} e \emph{direc
 può essere LEFT, RIGHT, BOTH mentre \emph{direction} indica la direzione che si 
 vuole impostare e può assumere i valori FORWARD e BACKWARD.
 Con queste informazioni sarà il metodo ad impostare le direzioni corrette ai motori 
-per far si che l'agente vada nella direzione effettivamente desiderata.
+per far sì che l'agente vada nella direzione effettivamente desiderata.
 \item \emph{brake()} e \emph{releaseBrake()}: rispettivamente attivano e disattivano i 
 freni dei motori. L'Arduino Motor Shield modula il segnale inviato ai motori in 
 modo da farli fermare velocemente.
