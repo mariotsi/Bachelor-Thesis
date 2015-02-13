@@ -18,14 +18,14 @@ dispositivo Android ha bisogno di un'applicazione di supporto chiamata OpenCV
 Manager che può essere scaricata dal Play Store o installata direttamente con il
 pacchetto APK.\footnote{Android Package, il tipo di file delle app Android simile 
 al formato JAR.} La libreria viene caricata in modo asincrono all'avvio dell'app
-e fornisce ogni frame come una matrice dove ogni elemento rappresenta un pixel; 
+e fornisce ogni frame come una matrice in cui ogni elemento rappresenta un pixel; 
 OpenCV usa il tipo di dato interno Mat per rappresentare le matrici.
 Tutte le operazioni effettuate su oggetti di tipo Mat usano algoritmi appositamente 
 ottimizzati per le operazioni tra matrici. 
 
 \section {ADK}
 In Android, a partire dalla versione 2.3.4, è supportato il protocollo Android Open 
-Accessory (AOA). Ogni accessorio sviluppato per Android deve comunicare con il sistema operativo 
+Accessory (AOA) e ogni accessorio sviluppato per Android deve comunicare con il sistema operativo 
 tramite lo stesso protocollo. 
 \\A causa della limitata autonomia dei dispositivi su cui Android è maggiormente 
 utilizzato (smarthphone e tablet), l'AOA impone che l'accessorio funga da host 
@@ -77,18 +77,19 @@ usb\_accessory\_filter.xml associato.
 Le stesse identiche stringhe saranno impostate durante la fase di configurazione 
 di Arduino in modo da permette l'accoppiamento.
 \section {ADK Toolkit}
-L'ADK toolkit è una libreria che aggiunge un grado di astrazione all'ADK, semplificando 
-l'inizializzazione della connessione, l'invio e la ricezione dei messaggi.\\
-Il toolkit si basa su due classi principali: AdkManager e AdkMessage.	\\	
+L'ADK Toolkit è una libreria che aggiunge un grado di astrazione all'ADK, semplificando 
+l'inizializzazione della connessione, l'invio e la ricezione dei messaggi.
+
+Il Toolkit si basa su due classi principali: AdkManager e AdkMessage.	\\	
 AdkManager espone metodi per la gestione della connessione e per l'invio e la 
-ricezioni di dati. AdkMessage rappresenta il messaggio ricevuto dall'accessorio 
-nel suo formato nativo, cioè un array di byte; tramite dei metodi ausiliari, 
+ricezioni di dati. AdkMessage rappresenta il messaggio ricevuto dall'accessorio; 
+tramite dei metodi ausiliari, 
 \textit{getString()}, \textit{getFloat()}, \textit{getInt()}, è possibile 
 ottenere il typecast del messaggio ricevuto, normalmente rappresentato da un array di byte. 
 Il recupero del messaggio originale può essere ottenuto grazie ai metodi 
 \textit{getBytes()} e \textit{getByte()}.\\
 Grazie a questa libreria l'uso dell'ADK, originariamente poco intuitivo, diventa 
-efficiente ed elegante
+efficiente ed elegante.
 \lstset{
 language=Java,
 frame=tb,  
