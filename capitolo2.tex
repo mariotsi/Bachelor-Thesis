@@ -4,11 +4,11 @@
 \fancyfoot[C]{\thepage } 
 \section{UDOO Quad}
 UDOO è un progetto tutto italiano di una piattaforma hardware destinata alla 
-generazione dei ``makers'', i cosiddetti \emph{artigiani digitali} del 21$^\circ$ secolo,
+generazione dei ``maker'', i cosiddetti \emph{artigiani digitali} del 21$^\circ$ secolo,
 cioè persone che inventano e producono apparecchi di ogni genere e condividono i risultati 
 pubblicamente sotto licenza open-source così che possano essere la base di un 
 progetto di un altro maker. La 
-scheda ha visto la luce dopo una sorprendente campagna di crowdfunding
+scheda UDOO ha visto la luce dopo una sorprendente campagna di crowdfunding
 \footnote{Dall'inglese crowd, folla e funding, finanziamento. In italiano 
 finanziamento collettivo. La piattaforma utilizzata è Kickstarter.} che ha raggiunto la quota richiesta dagli sviluppatori 
 per iniziare la produzione in solo due giorni. 
@@ -42,7 +42,7 @@ Android.\\
 sistema operativo come root tramite la porta seriale integrata e modificare a 
 piacimento la configurazione del sistema operativo. Arduino è collegato al 
 Freescale i.MX6 tramite un bus interno e quindi viene rilevato come una 
-normale periferica USB da Linux; su Android la comunicazione tra i due 
+normale periferica USB da Linux. Su Android la comunicazione tra i due 
 dispositivi avviene sullo stesso bus ma usa lo standard USB OTG\footnote{On-The
 -Go è una specifica che permettere di agire come host ad un qualsiasi  
 dispositivo (tipicamente smartphone e tablet). A differenza dell'USB classico 
@@ -51,6 +51,7 @@ per ogni dispositivo.}. L'interconnessione tra l'accessorio Arduino e
 l'applicazione Android è realizzata tramite l'ADK\footnote{Android Development 
 Kit.} 2012 che permette l'integrazione del sistema operativo con altre periferiche 
 o dispositivi, tramite una connessione USB o Bluetooth.
+
 \section {Tank Kit}
 Per dare la giusta stabilità e manovrabilità al robot si è deciso di usare una
 locomozione a cingoli che richiede solo due motori e permette di ruotare sul 
@@ -62,11 +63,13 @@ affrontare terreni impervi e scoscesi, quattro ruote da 52 mm di diametro a
 cui sono applicati i due cingoli. È presente anche un alloggiamento per un 
 servomotore standard che nella nostra applicazione non è stato usato. 
 L'intelaiatura, di alluminio spesso 2,5 mm, presenta numerosi fori e asole
-per il montaggio di accessorie quali sensori, staffe e motori. Presenta
+per il montaggio di accessori quali sensori, staffe e motori. Presenta
 inoltre un ``doppio fondo'' in cui sono alloggiati i motori DC e i riduttori 
 e in cui è possibile sistemare altri componenti che non debbano essere 
 facilmente accessibili.
+
 \section {Sensori}
+
 \subsection{Sensore di riflessività - QRD1114}
 Avendo la necessità di fornire al robot un modo per rilevare eventuali 
 sconfinamenti dall'ambiente di sperimentazione che fosse il più flessibile possibile. 
@@ -81,7 +84,7 @@ realizzato con materiale a bassa riflettività come del semplice cartoncino nero
 Il sensore, non facendo differenza tra il cartoncino nero o un eventuale margine 
 di caduta a lato della superficie, può essere impiegato per rilevare entrambe le condizioni.
 Il sensore così come fornito dal produttore non è direttamente 
-utilizzabile; per far si che Arduino potesse acquisire dal sensore valori 
+utilizzabile; per far sì che Arduino potesse acquisire dal sensore valori 
 proporzionali alla riflessività del materiale in esame, abbiamo dovuto 
 realizzare un circuito elettronico di interfaccia. 
 \begin{figure}[!htb] \center
@@ -89,7 +92,7 @@ realizzare un circuito elettronico di interfaccia.
 \caption{Circuito di interfaccia tra Arduino Due e il sensore QRD1114} 
 \end{figure}
 \\Il circuito alimenta il LED tramite una resistenza da 220$\Omega$ (\textit{R1}) 
-e collega $V_{CC}$\footnote{pari a 3,3 $V$ nell'Arduino Due.} al collettore del 
+e collega $V_{CC}$, pari a 3,3 $V$ nell'Arduino Due, al collettore del 
 fototransistor tramite una resistenza da 10 $k\Omega$ (\textit{R2}) mentre 
 l'emettitore è collegato a terra; il punto da cui prelevare il segnale ($V_{out
 }$) è tra \textit{R2} e il collettore. Il principio alla base del circuito è: 
@@ -117,6 +120,7 @@ quale il robot rileva un allarme di sconfinamento. La libertà nello scegliere
 una soglia di allarme ci permette di effettuare una calibrazione affinata in 
 base al materiale su cui si svolge la sperimentazione per minimizzare la possibilità di 
 falsi positivi. 
+
 \subsection{Sensore di distanza a ultrasuoni - HC-SR04}
 L'algoritmo di governo del robot, necessita della distanza degli oggetti che si 
 trovano di fronte ad esso; la scelta è ricaduta su un sensore 
@@ -125,8 +129,8 @@ soggetto a rumore dovuto all'illuminazione dell'ambiente di sperimentazione.
 In particolare abbiamo scelto il sensore HC-SR04 che 
 offre ottime prestazioni, è facile da integrare ed è di dimensioni contenute.\\
 Il sensore può rilevare oggetti distanti da 2 cm a 400 cm con una risoluzione 
-di 0,3 cm entro un cono frontale con apertura di 60$^\circ$, 30$^\circ$ per lato 
-rispetto alla perpendicolare dal sensore.
+di 0,3 cm entro un cono frontale di 30$^\circ$ per lato 
+rispetto alla perpendicolare dal sensore, complessivamente 60$^\circ$.
 \begin{figure}[!htb] \center
 \includegraphics[scale=0.6]{immagini/HC-SR04_Angle.png}
 \caption{Risposta del sensore rispetto alla posizione dell'ostacolo} 
@@ -147,7 +151,7 @@ rispettivamente per distanze percorse di 4 cm (2+2) e di 8 m (4+4).
 notando che 344 m/s = 29,1 cm/$\mu$s e indicando con $T_e$ la durata dell'impulso 
 di echo usiamo:
 $$d=\frac{T_e}{2\cdot29,1}$$
-Arduino Due non accetta input a 5 V, tali valori di tensione comprometterebbero in modo 
+Arduino Due accetta input solo fino a 3,3 V, valori più elevati di tensione comprometterebbero in modo 
 irreparabile il funzionamento della scheda.\\ 
 In questo caso il circuito di interfaccia porterà la tensione di 5 V del segnale in uscita 
 dal sensore ad un valore accettato dall'Arduino Due e cioè 3,3 V; serve quindi un 
@@ -163,12 +167,12 @@ tramite due resistenze opportunamente dimensionate. \\
 La formula che regola il partitore di tensione è la seguente:
 $$V_{out}=V_{in}\cdot\frac{R_2}{R_1+R_2}$$
 nel nostro caso $V_{in}$ = 5 V e $V_{out}$ = 3,3 V quindi scegliendo arbitrariamente 
-il valore di $R_1=1$ k$\Omega$ ricaviamo il valore di $R_2$ tramite 
-la formula inversa $$R_2 = R_1\cdot\frac{V_{out}}{V_{in}-V_{out}}$$
+il valore di $R_1$ pari a 1 k$\Omega$, ricaviamo il valore di $R_2$ tramite 
+la formula inversa: $$R_2 = R_1\cdot\frac{V_{out}}{V_{in}-V_{out}}$$
 che da come risultato 1941,48 $\Omega$; approssimando il valore appena calcolato
 al più vicino taglio standard di resistenze, cioè $R_2 $ = 2 k$\Omega$, si 
 ottiene $V_{out}$
- = $3,\overline{3}$ che è assolutamente accettabile.
+ = $3,\overline{3}$, che è assolutamente accettabile.
 
 \begin{figure}[H] \center
 \includegraphics[scale=0.3]{immagini/HC-SR04_Circuito.png}
